@@ -1,8 +1,6 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Models\User;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\{
     CardboardController
@@ -12,10 +10,7 @@ use App\Http\Controllers\Admin\{
 Route::group([
     'prefix' => 'v1.0',
 ], function () {
-    Route::get('/users',function (Request $request){
-        return User::all();
-    });
-
+    // Route: Auth
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/signup', [AuthController::class, 'signup']);
 

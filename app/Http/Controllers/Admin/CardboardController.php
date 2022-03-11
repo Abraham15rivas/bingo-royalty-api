@@ -38,7 +38,7 @@ class CardboardController extends Controller
     private function cardboardGenerator() {
         $matrix = collect();
 
-          try {
+        try {
             foreach ($this->rules['letters'] as $key => $item) {
                 $matrix[$key] = collect();
 
