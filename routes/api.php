@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+
 use App\Http\Controllers\Admin\{
     CardboardController
 };
@@ -14,12 +15,12 @@ Route::group([
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/signup', [AuthController::class, 'signup']);
 
-    // Group route: Authenticated users
     Route::group([
         'middleware' => 'auth:api',
     ], function () {
         Route::get('/logout', [AuthController::class, 'logout']);
         Route::get('/user',   [AuthController::class, 'user']);
+
 
         // Group route: Admin
         Route::group([
@@ -28,5 +29,6 @@ Route::group([
         ], function () {
             Route::get('cardboard', [CardboardController::class, 'index']);
         });
+
     });
 });
