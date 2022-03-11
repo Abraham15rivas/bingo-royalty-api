@@ -21,7 +21,8 @@ class AuthController extends Controller
         $user = new User([
             'name'     => $request->name,
             'email'    => $request->email,
-            'password' => bcrypt($request->password)
+            'password' => bcrypt($request->password),
+            'role_id'  => 1
         ]);
 
         $user->save();
@@ -38,9 +39,9 @@ class AuthController extends Controller
         ]);
 
         $credentials = request(['email', 'password']);
+
         if (!Auth::attempt($credentials)) {
-            return response()->json([
-                'message' => 'Unauthorized'], 401);
+            return response()->json([   'message' => 'Unauthorized'], 401);
         }
 
         $user = $request->user();
