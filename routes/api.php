@@ -29,6 +29,5 @@ Route::group([
         ], function () {
             Route::get('cardboard', [CardboardController::class, 'index']);
         });
-
     });
 });
