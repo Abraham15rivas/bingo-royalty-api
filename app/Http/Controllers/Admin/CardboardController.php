@@ -47,7 +47,9 @@ class CardboardController extends Controller
                     $randomInt      = random_int($item[0], $item[1]);
 
                     if ($randomInt >= $item[0] && $randomInt <= $item[1]) {
-                        if ($lastRandomInt !== $randomInt) {
+                        $exists = $matrix[$key]->has("$randomInt");
+
+                        if ($lastRandomInt !== $randomInt && !$exists) {
                             $matrix[$key]->push($randomInt);
                             $lastRandomInt = $randomInt;
                         }
