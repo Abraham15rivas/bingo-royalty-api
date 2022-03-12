@@ -25,7 +25,6 @@ class CreateUsersTable extends Migration
                 ->constrained()
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
-            $table->string('role')->nullable()->default('user');
             $table->softDeletes();
         });
     }
