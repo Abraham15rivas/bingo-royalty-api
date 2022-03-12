@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\{
     SoftDeletes
 };
 
-class Cardboard extends Model
+class MatrixGroup extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -18,8 +18,12 @@ class Cardboard extends Model
      * @var array
      */
     protected $fillable = [
-        'name',
-        'description',
+        'expiration_date',
         'vip'
     ];
+
+    public function matrices()
+    {
+        return $this->hasMany(Matrix::class);
+    }
 }

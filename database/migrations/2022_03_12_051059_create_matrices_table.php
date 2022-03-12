@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCardboardsTable extends Migration
+class CreateMatricesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,13 @@ class CreateCardboardsTable extends Migration
      */
     public function up()
     {
-        Schema::create('cardboards', function (Blueprint $table) {
+        Schema::create('matrices', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->text('description');
-            $table->boolean('vip')->default(false);
+            $table->json('cardboards');
+            $table->foreignId('matrix_group_id')
+                ->constrained()
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -30,6 +32,6 @@ class CreateCardboardsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('cardboards');
+        Schema::dropIfExists('matrices');
     }
 }
