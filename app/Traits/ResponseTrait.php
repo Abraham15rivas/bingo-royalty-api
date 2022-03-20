@@ -5,9 +5,9 @@ namespace App\Traits;
 trait ResponseTrait {
     public function success($data = [], $result = 'result') {
         return (object) [
-            'statusCode' => 0,
-            'message' => 'Success',
-            "$result" => $data
+            'statusCode'    => 0,
+            'message'       => 'Success',
+            "$result"       => $data
         ];
     }
 
@@ -25,22 +25,30 @@ trait ResponseTrait {
 
     public function notAllowed() {
         return (object) [
-            'statusCode' => 2,
-            'message' => 'Unauthorized'
+            'statusCode'    => 2,
+            'message'       => 'Unauthorized'
         ];
     }
 
     public function invalidRequest() {
         return (object) [
-            'statusCode' => 3,
-            'message' => 'The request was not accepted'
+            'statusCode'    => 3,
+            'message'       => 'The request was not accepted'
         ];
     }
 
-    public function unauthenticated() {
+    public function unAuthenticated() {
         return (object) [
-            'statusCode' => 4,
-            'message' => 'unauthenticated'
+            'statusCode'    => 4,
+            'message'       => 'unauthenticated'
+        ];
+    }
+
+    public function validationFail($errors) {
+        return (object) [
+            'statusCode'    => 5,
+            'message'       => 'Fields do not meet',
+            'detail'        => $errors
         ];
     }
 }

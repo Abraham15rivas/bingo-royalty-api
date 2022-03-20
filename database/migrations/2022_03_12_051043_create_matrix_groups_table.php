@@ -15,7 +15,7 @@ class CreateMatrixGroupsTable extends Migration
     {
         Schema::create('matrix_groups', function (Blueprint $table) {
             $table->id();
-            $table->date('expiration_date');
+            $table->timestamp('expiration_date')->nullable();
             $table->boolean('vip')->default(false);
             $table->timestamps();
             $table->softDeletes();
