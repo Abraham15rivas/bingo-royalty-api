@@ -3,9 +3,14 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 
+// Folder Admin
 use App\Http\Controllers\Admin\{
-    CardboardController,
     MatrixController
+};
+
+// Folder User
+use App\Http\Controllers\User\{
+    CardboardController as CardboardControllerUser,
 };
 
 // Group route: v1.0 Bingo Royal
@@ -27,12 +32,19 @@ Route::group([
             'prefix' => 'admin',
             // 'middleware' => 'admin',
         ], function () {
-            // Cardboard
-            Route::get('cardboard', [CardboardController::class, 'index']);
-
             // Matrix
             Route::get('matrix', [MatrixController::class, 'index']);
             Route::post('matrix', [MatrixController::class, 'store']);
+        });
+
+        // Group route: User
+        Route::group([
+            'prefix' => 'user',
+            // 'middleware' => 'user',
+        ], function () {
+            // Cardboard
+            Route::get('cardboard', [CardboardControllerUser::class, 'index']);
+            Route::post('cardboard', [CardboardControllerUser::class, 'store']);
         });
     });
 });
