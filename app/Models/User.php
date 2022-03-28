@@ -68,4 +68,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Historical::class);
     }
+
+    public function userCardboards()
+    {
+        return $this->hasMany(UserCardboard::class);
+    }
 }

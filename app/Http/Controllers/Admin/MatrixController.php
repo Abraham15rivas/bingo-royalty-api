@@ -20,8 +20,6 @@ class MatrixController extends Controller
     protected $matrixGroup;
 
     protected $validationRules = [
-        'vip'       => 'boolean|required',
-        'matrices'  => 'array|nullable'
     ];
 
     protected $rules = [
@@ -68,29 +66,15 @@ class MatrixController extends Controller
         }
 
         try {
-            if ($request->vip === true) {
-                // separar o colocar en el metodo: cardboardGeneratorVip();
-                // para validar que no exista el mismo carton esta logica de cartones Vip
-                // es para los usuarios
-                $this->matrixGroup = MatrixGroup::select(
-                    'id',
-                    'vip',
-                    'expiration_date as expirationDate',
-                    DB::raw("datediff(expiration_date, now()) as dayElapsed")
-                )
-                ->where('vip', true)
-                ->get();
-            } else {
-                $matrixGroup = MatrixGroup::select(
-                    'id',
-                    'vip',
-                    'expiration_date as expirationDate',
-                    DB::raw("datediff(expiration_date, now()) as dayElapsed")
-                )
-                ->where('vip', false)
-                ->orderByDesc('expiration_date')
-                ->first();
-            }
+            $matrixGroup = MatrixGroup::select(
+                'id',
+                'vip',
+                'expiration_date as expirationDate',
+                DB::raw("datediff(expiration_date, now()) as dayElapsed")
+            )
+            ->where('vip', false)
+            ->orderByDesc('expiration_date')
+            ->first();
 
             if (!isset($matrixGroup->dayElapsed) || $matrixGroup->dayElapsed <= 0) {
                 $data   = $this->matrixGenerator($request);
@@ -135,25 +119,12 @@ class MatrixController extends Controller
         return $matrix;
     }
 
-    private function cardboardGeneratorVip($data) {
-        // falta validar los cartones vip here, para saber si estan repetidos
-        // Por ahora solo envia el mismo que recibe por indice con:
-        // $this->matrixGroup
-
-        return $data;
-    }
-
     private function matrixGenerator($request) {
         $currentDate    = Carbon::now();
         $matrix         = collect();
-        $vip            = $request['vip'];
 
-        for ($i = 0; $i < ($vip ? count($request->matrices) : 1000); $i++) {
-            $cardboard = $vip ? $this->cardboardGeneratorVip($request->matrices[$i]) : $this->cardboardGenerator();
-
-            if ($cardboard === true) {
-                return 'Duplicate cardboard, change combination';
-            }
+        for ($i = 0; $i < 1000; $i++) {
+            $cardboard = $this->cardboardGenerator();
 
             $matrix->push([
                 'id'        => ($i + 1),
@@ -163,9 +134,8 @@ class MatrixController extends Controller
         }
 
         $data = collect([
-            'vip'               => $request['vip'],
             'matrix'            => $matrix,
-            'expirationDate'    => $currentDate->addDays($vip ? 1 : 15)
+            'expirationDate'    => $currentDate->addDays(15)
         ]);
 
         return $data;
@@ -176,7 +146,6 @@ class MatrixController extends Controller
 
         try {
             $matrixGroup = MatrixGroup::create([
-                'vip'               => $data['vip'],
                 'expiration_date'   => $data['expirationDate']
             ]);
 
