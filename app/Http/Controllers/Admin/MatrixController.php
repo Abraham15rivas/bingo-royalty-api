@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Traits\ResponseTrait;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\{
+    DB,
+    Validator
+};
 use App\Models\{
     MatrixGroup,
     Matrix
@@ -18,20 +20,17 @@ class MatrixController extends Controller
     use ResponseTrait;
 
     protected $matrixGroup;
+    protected $user;
+    protected $rules;
 
     protected $validationRules = [
+        // rules
     ];
 
-    protected $rules = [
-        'rowNumber' => 5,
-        'letters'   => [
-            'B' => [1, 15],
-            'I' => [16, 30],
-            'N' => [31, 45],
-            'G' => [46, 60],
-            'O' => [61, 75]
-        ]
-    ];
+    public function __construct() {
+        $this->user     = auth()->guard('api')->user();
+        $this->rules    = config('bingo.rules');
+    }
 
     public function index(Request $request) {
         if (!$request->ajax()) {
@@ -119,7 +118,7 @@ class MatrixController extends Controller
         return $matrix;
     }
 
-    private function matrixGenerator($request) {
+    private function matrixGenerator() {
         $currentDate    = Carbon::now();
         $matrix         = collect();
 
