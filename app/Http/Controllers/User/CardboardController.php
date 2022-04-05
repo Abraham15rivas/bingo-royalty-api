@@ -4,9 +4,11 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\{
+    DB,
+    Validator
+};
 use App\Traits\{
     ResponseTrait,
     SeriateTrait
@@ -23,13 +25,16 @@ class CardboardController extends Controller
 
     protected $serial;
     protected $user;
+    protected $rules;
+    protected $cardboard;
 
     protected $validationRules = [
         'matrices' => 'array|required'
     ];
 
     public function __construct() {
-        $this->user = auth()->guard('api')->user();
+        $this->user     = auth()->guard('api')->user();
+        $this->rules    = config('bingo.rules');
     }
 
     public function index(Request $request) {
@@ -38,20 +43,18 @@ class CardboardController extends Controller
         }
 
         try {
-            // $this->matrixGroup = MatrixGroup::select(
-            //     'id',
-            //     'vip',
-            //     'expiration_date as expirationDate',
-            //     DB::raw("datediff(expiration_date, now()) as dayElapsed")
-            // )
-            // ->where('vip', true)
-            // ->get();
-            $result = 'lista de los cartones que pertenecen al usuario';
+            $this->cardboard = UserCardboard::select(
+                'serial',
+                'status',
+            )
+            ->where('user_id', $this->user->id)
+            ->orderByDesc('id')
+            ->get();
         } catch (\Exception $e) {
             return response()->json($this->serverError($e));
         }
 
-        return response()->json($this->success($result, 'cardboard'));
+        return response()->json($this->success($this->cardboard, 'cardboards'));
     }
 
     public function store(Request $request) {
@@ -82,8 +85,6 @@ class CardboardController extends Controller
 
     private function cardboardGeneratorVip($data) {
         // falta validar los cartones vip here, para saber si estan repetidos
-        // Por ahora solo envia el mismo que recibe por indice con:
-
         return $data;
     }
 
