@@ -27,6 +27,6 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
         Passport::routes();
 
-        Passport::loadKeysFrom('http://bingo-royalty.epizy.com/keys');
+        Passport::loadKeysFrom(__DIR__.'/../../keys');
     }
 }
