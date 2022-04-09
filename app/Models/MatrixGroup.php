@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\{
     SoftDeletes
 };
 
-class Wallet extends Model
+class MatrixGroup extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -18,18 +18,12 @@ class Wallet extends Model
      * @var array
      */
     protected $fillable = [
-        'name',
-        'balance',
-        'user_id'
+        'expiration_date',
+        'vip'
     ];
 
-    public function user()
+    public function matrices()
     {
-        return $this->belongsTo(User::class);
-    }
-
-    public function activities()
-    {
-        return $this->hasMany(WalletActivity::class);
+        return $this->hasMany(Matrix::class);
     }
 }

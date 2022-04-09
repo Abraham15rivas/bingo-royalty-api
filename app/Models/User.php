@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+use Laravel\Passport\HasApiTokens;
 
 class User extends Authenticatable
 {
@@ -67,5 +67,10 @@ class User extends Authenticatable
     public function historicals()
     {
         return $this->hasMany(Historical::class);
+    }
+
+    public function userCardboards()
+    {
+        return $this->hasMany(UserCardboard::class);
     }
 }

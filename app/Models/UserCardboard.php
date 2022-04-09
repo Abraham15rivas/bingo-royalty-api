@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\{
     SoftDeletes
 };
 
-class Cardboard extends Model
+class UserCardboard extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -18,8 +18,13 @@ class Cardboard extends Model
      * @var array
      */
     protected $fillable = [
-        'name',
-        'description',
-        'vip'
+        'status',
+        'serial',
+        'user_id'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
