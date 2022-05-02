@@ -37,7 +37,8 @@ class AccountController extends Controller
             $this->accounts = Account::select(
                 'name',
                 'description',
-                'attributes'
+                'attributes',
+                'type_account'
             )
             ->where('user_id', $this->user->id)
             ->get();
@@ -61,7 +62,8 @@ class AccountController extends Controller
 
         $this->validatorRules = [
             'name'          => 'string|required',
-            'description'   => 'string|nullable'
+            'type_account'  => 'string|required',
+            'description'   => 'string|nullable',
         ];
 
         $validator = $this->validator($request->all(), $this->validatorRules, class_basename($this));
@@ -75,6 +77,7 @@ class AccountController extends Controller
         try {
             $this->account = Account::create([
                 'name'          => $request->name,
+                'type_account'  => $request->typeAccount,
                 'description'   => $request->description,
                 'attributes'    => json_encode($request->detail),
                 'user_id'       => $this->user->id
