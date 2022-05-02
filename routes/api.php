@@ -11,7 +11,8 @@ use App\Http\Controllers\Admin\{
 // Folder User
 use App\Http\Controllers\User\{
     CardboardController as CardboardControllerUser,
-    WalletController as WalletControllerUser
+    WalletController as WalletControllerUser,
+    UserProfileController
 };
 
 // Group route: v1.0 Bingo Royal
@@ -21,13 +22,14 @@ Route::group([
     // Route: Auth
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/signup', [AuthController::class, 'signup']);
-
+    
     Route::group([
         'middleware' => 'auth:api',
     ], function () {
         Route::get('/logout', [AuthController::class, 'logout']);
         Route::get('/user',   [AuthController::class, 'user']);
 
+        Route::get('/user-profile',[UserProfileController::class, 'show']);
         // Group route: Admin
         Route::group([
             'prefix' => 'admin',
