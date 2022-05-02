@@ -62,7 +62,7 @@ class AccountController extends Controller
 
         $this->validatorRules = [
             'name'          => 'string|required',
-            'type_account'  => 'string|required',
+            'typeAccount'   => 'string|required',
             'description'   => 'string|nullable',
         ];
 
