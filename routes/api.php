@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\{
 use App\Http\Controllers\User\{
     CardboardController as CardboardControllerUser,
     WalletController as WalletControllerUser,
+    AccountController as AccountControllerUser,
     UserProfileController
 };
 
@@ -27,13 +28,11 @@ Route::group([
         'middleware' => 'auth:api',
     ], function () {
         Route::get('/logout', [AuthController::class, 'logout']);
-        Route::get('/user',   [AuthController::class, 'user']);
 
-        Route::get('/user-profile',[UserProfileController::class, 'show']);
         // Group route: Admin
         Route::group([
             'prefix' => 'admin',
-            // 'middleware' => 'admin',
+            'middleware' => 'admin',
         ], function () {
             // Matrix
             Route::get('matrices', [MatrixController::class, 'index']);
@@ -43,11 +42,23 @@ Route::group([
         // Group route: User
         Route::group([
             'prefix' => 'user',
-            // 'middleware' => 'user',
+            'middleware' => 'user',
         ], function () {
+            // User
+            Route::get('/',   [AuthController::class, 'user']);
+
+            // Profile
+            Route::prefix('profile')->group(function () {
+                Route::get('/',[UserProfileController::class, 'show']);
+
+                // Account
+                Route::resources(['accounts' => AccountControllerUser::class]);
+            });
+
             // Cardboard
             Route::get('cardboards', [CardboardControllerUser::class, 'index']);
             Route::post('cardboards', [CardboardControllerUser::class, 'store']);
+            Route::post('cardboard/group', [CardboardControllerUser::class, 'buyCardboard']);
 
             // Wallet
             Route::get('wallet', [WalletControllerUser::class, 'index']);
