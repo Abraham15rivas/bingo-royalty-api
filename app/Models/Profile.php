@@ -21,6 +21,7 @@ class Profile extends Model
         'name',
         'last_name',
         'nick_name',
+        'profile_image',
         'language',
         'country',
         'user_id'
