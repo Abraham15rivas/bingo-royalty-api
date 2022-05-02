@@ -21,6 +21,7 @@ class Account extends Model
         'name',
         'description',
         'attributes',
+        'type_account',
         'user_id'
     ];
 
