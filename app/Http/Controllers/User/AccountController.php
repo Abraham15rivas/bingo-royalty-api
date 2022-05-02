@@ -76,7 +76,7 @@ class AccountController extends Controller
             $this->account = Account::create([
                 'name'          => $request->name,
                 'description'   => $request->description,
-                'attributes'    => json_encode($request->attributes),
+                'attributes'    => json_encode($request->detail),
                 'user_id'       => $this->user->id
             ]);
 
