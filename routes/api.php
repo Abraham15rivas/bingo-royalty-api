@@ -49,7 +49,8 @@ Route::group([
 
             // Profile
             Route::prefix('profile')->group(function () {
-                Route::get('/',[UserProfileController::class, 'show']);
+                Route::get('/', [UserProfileController::class, 'show']);
+                Route::post('/store', [UserProfileController::class, 'store']);
 
                 // Account
                 Route::resources(['accounts' => AccountControllerUser::class]);

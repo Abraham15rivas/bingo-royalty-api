@@ -62,9 +62,10 @@ class AccountController extends Controller
         }
 
         $this->validatorRules = [
-            'name'          => 'string|required',
-            'typeAccount'   => 'string|required',
-            'description'   => 'string|nullable',
+            'name'         => 'string|required',
+            'type_account' => 'string|required',
+            'description'  => 'string|nullable',
+            'detail'   => 'required'
         ];
 
         $validator = $this->validator($request->all(), $this->validatorRules, class_basename($this));
@@ -72,13 +73,12 @@ class AccountController extends Controller
         if ($validator->fails()) {
             return $this->validationFail($validator->errors());
         }
-
         DB::beginTransaction();
-
+        
         try {
             $this->account = Account::create([
                 'name'          => $request->name,
-                'type_account'  => $request->typeAccount,
+                'type_account'  => $request->type_account,
                 'description'   => $request->description,
                 'attributes'    => json_encode($request->detail),
                 'user_id'       => $this->user->id
@@ -94,17 +94,6 @@ class AccountController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -113,7 +102,36 @@ class AccountController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $validatedData = $request->validate([
+            'name'         => 'string|required',
+            'type_account' => 'string|required',
+            'description'  => 'string|nullable',
+            'detail'   => 'required'
+        ]);
+
+       
+
+        try {
+            $profile = Account::where('user_id', $request->user()->id)->get();
+            $profile = $profile[0];
+            
+            $profile->name = $request->name;
+            $profile->last_name = $request->last_name;
+            $profile->nick_name = $request->nick_name;
+            $profile->country = $request->country;
+
+            $profile->save();
+
+        } catch (\Throwable $th) {
+            $statusCode = 1;
+            $msg = 'Hubo un error';
+        }
+
+        return response()->json([
+            'statusCode' => isset($statusCode) ? $statusCode : 0,
+            'message' => isset($msg) ? $msg : 'Success',
+            'user' => isset($profile) ? $profile : (object) []
+        ]);
     }
 
     /**
@@ -123,7 +141,11 @@ class AccountController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
-    {
-        //
+    {   
+        $account = Account::where('id',$id)->delete();
+
+        if($account > 0 ){
+            return response()->json(['message'=>'Eliminado correctamente'], 200);
+        }
     }
 }

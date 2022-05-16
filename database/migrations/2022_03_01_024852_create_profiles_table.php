@@ -20,6 +20,7 @@ class CreateProfilesTable extends Migration
             $table->string('nick_name');
             $table->string('language');
             $table->string('country');
+            $table->string('profile_image')->nullable();
             $table->foreignId('user_id')
                 ->constrained()
                 ->onUpdate('cascade')
