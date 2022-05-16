@@ -37,8 +37,6 @@ class UserProfileController extends Controller
             'profile_image' => 'required|mimes:jpg,jpeg,png|max:2048'
         ]);
 
-       
-
         try {
             $profile = Profile::where('user_id', $request->user()->id)->get();
             $profile = $profile[0];
