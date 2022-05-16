@@ -20,6 +20,7 @@ class CreateUsersTable extends Migration
             $table->boolean('vip')->default(false);
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->boolean('is_active')->default(true);
             $table->rememberToken();
             $table->timestamps();
             $table->foreignId('role_id')
