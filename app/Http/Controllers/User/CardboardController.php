@@ -168,6 +168,39 @@ class CardboardController extends Controller
         return 'done';
     }
 
+    public function listCardboard(Request $request) {
+        if (!$request->ajax()) {
+            return response()->json($this->invalidRequest());
+        }
+
+        try {
+            $search = "jhjhjhfgfdrt";
+            $this->matrixGroup = MatrixGroup::select(
+                'id',
+                'vip',
+                'expiration_date as expirationDate',
+                DB::raw("datediff(expiration_date, now()) as dayElapsed")
+            )
+            ->with([
+                'matrices' => function ($query) use ($search) {
+                    $query->select(
+                        'matrix_group_id',
+                        'cardboards'
+                        // DB::raw("JSON_EXTRACT(cardboards,'$[*].cardboard') as cardboard")
+                    )
+                    ->whereRaw("`cardboards`->>'$[*].serial' != ?", ["$search"])
+                    ->get();
+                }
+            ])
+            ->where('vip', false)
+            ->first();
+        } catch (\Exception $e) {
+            return response()->json($this->serverError($e));
+        }
+
+        return response()->json($this->success($this->matrixGroup));
+    }
+
     public function buyCardboard(Request $request) {
         if (!$request->ajax()) {
             return response()->json($this->invalidRequest());
