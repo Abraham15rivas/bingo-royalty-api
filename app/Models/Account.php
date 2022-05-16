@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\{
 
 class Account extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     /**
      * The attributes that are mass assignable.
