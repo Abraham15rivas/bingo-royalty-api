@@ -59,6 +59,7 @@ Route::group([
             // Cardboard
             Route::get('cardboards', [CardboardControllerUser::class, 'index']);
             Route::post('cardboards', [CardboardControllerUser::class, 'store']);
+            Route::get('cardboard/group', [CardboardControllerUser::class, 'listCardboard']);
             Route::post('cardboard/group', [CardboardControllerUser::class, 'buyCardboard']);
 
             // Wallet

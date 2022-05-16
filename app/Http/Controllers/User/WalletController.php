@@ -122,6 +122,7 @@ class WalletController extends Controller
                         ->select('id', 'email')
                         ->where('email', $request->email)
                         ->where('role_id', 3)
+                        ->where('id', '!=', $this->user->id)
                         ->first();
 
                     if (!empty($receiver)) {
