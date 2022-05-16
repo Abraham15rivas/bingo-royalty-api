@@ -35,6 +35,7 @@ class AccountController extends Controller
 
         try {
             $this->accounts = Account::select(
+                'id',
                 'name',
                 'description',
                 'attributes',

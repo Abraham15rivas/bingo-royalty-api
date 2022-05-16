@@ -4,6 +4,8 @@ namespace App\Traits;
 use Illuminate\Support\Facades\Validator;
 
 trait ValidatorTrait {
+    protected $errors;
+
     public function validator($data, $validationData, $nameController)
     {
         $customMessages = [
@@ -16,5 +18,10 @@ trait ValidatorTrait {
         ];
 
         return Validator::make($data, $validationData, $customMessages);
+    }
+
+    public function customValidator($nameController, $field, $message) {
+        $this->errors[$field] = ["$nameController: $field $message"];
+        return $this->errors;
     }
 }
