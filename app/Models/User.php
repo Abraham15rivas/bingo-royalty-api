@@ -73,4 +73,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserCardboard::class);
     }
+
+    /**
+     * Override the mail body for reset password notification mail.
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new \App\Notifications\MailResetPasswordNotification($token));
+    }
 }

@@ -23,6 +23,12 @@ Route::group([
     // Route: Auth
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/signup', [AuthController::class, 'signup']);
+
+    // Send reset password mail
+    Route::post('reset-password',  [AuthController::class, 'sendPasswordResetLink']);
+    
+    // handle reset password form process
+    Route::post('reset/password', [AuthController::class, 'callResetPassword']);
     
     Route::group([
         'middleware' => 'auth:api',
@@ -53,7 +59,9 @@ Route::group([
                 Route::post('/store', [UserProfileController::class, 'store']);
 
                 // Account
-                Route::resources(['accounts' => AccountControllerUser::class]);
+                Route::resources(['accounts'  => AccountControllerUser::class]);
+                Route::put('accounts/active/{id}', [AccountControllerUser::class, 'activeAccount']);
+                Route::get('accounts/active/', [AccountControllerUser::class, 'show']);
             });
 
             // Cardboard
