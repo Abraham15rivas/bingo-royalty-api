@@ -19,13 +19,19 @@ class WalletController extends Controller
     use ResponseTrait, ValidatorTrait;
 
     protected $user;
+    protected $userId;
 
     protected $validationRules = [
         'balanceAcquired' => 'required|numeric|regex:/^[\d]{0,11}(\.[\d]{1,2})?$/', /* 0 to 11 digits and 2 optional decimals */
     ];
 
-    public function __construct() {
-        $this->user = auth()->guard('api')->user();
+    public function __construct($userId = null) {
+        if ($userId === null) {
+            $this->user = auth()->guard('api')->user();
+            $this->userId = $this->user->id;
+        } else {
+            $this->userId = $userId;
+        }
     }
 
     public function index(Request $request) {
@@ -67,7 +73,7 @@ class WalletController extends Controller
                     'name',
                     'balance',
                 )
-                ->where('user_id', $this->user->id)
+                ->where('user_id', $this->userId)
                 ->first();
 
                 if ($wallet) {
@@ -87,7 +93,6 @@ class WalletController extends Controller
         }
 
         return response()->json($this->success($result));
-
     }
 
     public function transferBalance(Request $request) {
