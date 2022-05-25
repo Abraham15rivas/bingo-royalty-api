@@ -8,12 +8,18 @@ use App\Http\Controllers\Admin\{
     MatrixController
 };
 
+// Folder Admin
+use App\Http\Controllers\PlayAssistant\{
+    RequestController
+};
+
 // Folder User
 use App\Http\Controllers\User\{
     CardboardController as CardboardControllerUser,
     WalletController as WalletControllerUser,
     AccountController as AccountControllerUser,
-    UserProfileController
+    UserProfileController,
+    RequestController as RequestControllerUser
 };
 
 // Group route: v1.0 Bingo Royal
@@ -76,6 +82,20 @@ Route::group([
             Route::post('wallet/balance', [WalletControllerUser::class, 'rechargeBalance']);
             Route::put('wallet/balance', [WalletControllerUser::class, 'transferBalance']);
             Route::get('wallet/activity', [WalletControllerUser::class, 'getActivities']);
+
+            // Request
+            Route::post('request', [RequestControllerUser::class, 'store']);
+        });
+
+        // Group route: User
+        Route::group([
+            'prefix' => 'play-assistant',
+            'middleware' => 'playAssistant',
+        ], function () {
+            // Request
+            Route::get('requests', [RequestController::class, 'index']);
+            Route::put('requests/{id}', [RequestController::class, 'approveRequest']);
+            Route::put('requests/{id}/reject', [RequestController::class, 'rejectRequest']);
         });
     });
 });
