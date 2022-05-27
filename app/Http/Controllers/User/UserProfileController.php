@@ -49,7 +49,7 @@ class UserProfileController extends Controller
             if($request->file('profile_image')) {
                 $file_name = $profile->name.'-'.$request->file('profile_image')->getClientOriginalName();
                 $file_path = $request->file('profile_image')->storeAs('uploads', $file_name, 'public');
-                $profile->profile_image = '/storage/' . $file_path;
+                $profile->profile_image = 'storage/' . $file_path;
             }
 
             $profile->save();
