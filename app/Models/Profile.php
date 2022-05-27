@@ -31,4 +31,13 @@ class Profile extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function getImageAttribute($value)
+    {
+        if ($value) {
+            return asset('storage/uploads/' . $value);
+        } else {
+            return asset('storage/uploads/bnb.png');
+        }
+    }
 }

@@ -47,9 +47,9 @@ class UserProfileController extends Controller
             $profile->country = $request->country;
 
             if($request->file('profile_image')) {
-                $file_name = time().'-'.$profile->name.'-'.$request->file('profile_image')->getClientOriginalName();
+                $file_name = $profile->name.'-'.$request->file('profile_image')->getClientOriginalName();
                 $file_path = $request->file('profile_image')->storeAs('uploads', $file_name, 'public');
-                $profile->profile_image = '/storage/' . $file_path;
+                $profile->profile_image = 'storage/' . $file_path;
             }
 
             $profile->save();

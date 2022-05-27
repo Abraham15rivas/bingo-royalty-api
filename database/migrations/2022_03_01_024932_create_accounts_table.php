@@ -18,6 +18,7 @@ class CreateAccountsTable extends Migration
             $table->string('name');
             $table->string('type_account');
             $table->text('description')->nullable();
+            $table->boolean('is_active')->default(false);
             $table->json('attributes');
             $table->foreignId('user_id')
                 ->constrained()

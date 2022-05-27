@@ -38,11 +38,14 @@ class AccountController extends Controller
                 'id',
                 'name',
                 'description',
+                'is_active',
                 'attributes',
                 'type_account'
             )
             ->where('user_id', $this->user->id)
+            ->orderBy('is_active', 'DESC')
             ->get();
+
         } catch (\Exception $e) {
             return response()->json($this->serverError($e));
         }
@@ -109,8 +112,6 @@ class AccountController extends Controller
             'detail'   => 'required'
         ]);
 
-       
-
         try {
             $profile = Account::where('user_id', $request->user()->id)->get();
             $profile = $profile[0];
@@ -140,12 +141,79 @@ class AccountController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {   
+        if (!$request->ajax()) {
+            return response()->json($this->invalidRequest());
+        }
+
         $account = Account::where('id',$id)->delete();
 
         if($account > 0 ){
             return response()->json(['message'=>'Eliminado correctamente'], 200);
         }
+    }
+
+    public function show(Request $request, $id)
+    {
+        if (!$request->ajax()) {
+            return response()->json($this->invalidRequest());
+        }        
+
+        try {
+            $accountActive = Account::select(
+                'id',
+                'name',
+                'is_active',
+                'type_account',
+                'attributes'
+            )
+            ->where('user_id', $this->user->id)
+            ->where('is_active', 1)
+            ->first();
+
+        } catch (\Throwable $th) {
+            $statusCode = 1;
+            $msg = 'Hubo un error';
+        }
+
+        return response()->json([
+            'statusCode' => isset($statusCode) ? $statusCode : 0,
+            'message' => isset($msg) ? $msg : 'Success',
+            'account' => isset($accountActive) ? $accountActive : $accountActive
+        ]);
+    }
+
+    public function activeAccount(Request $request, $id)
+    {
+        if (!$request->ajax()) {
+            return response()->json($this->invalidRequest());
+        }        
+
+        $validatedData = $request->validate([
+            'is_active' => 'boolean|required',
+        ]);
+
+        try {
+            $accountDeactive = Account::select('is_active')
+            ->where('user_id', $this->user->id)
+            ->where('is_active', 1)
+            ->update(array(
+                'is_active' => 0,
+            ));
+
+            $account = Account::where('id', $id)
+                ->where('user_id', $this->user->id)
+                ->update(['is_active' => $request->is_active]);
+               
+        } catch (\Throwable $th) {
+            $statusCode = 1;
+            $msg = 'Hubo un error';
+        }
+
+        return response()->json([
+            'statusCode' => isset($statusCode) ? $statusCode : 0,
+            'message' => isset($msg) ? $msg : 'Success',
+        ]);
     }
 }

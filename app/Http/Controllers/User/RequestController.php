@@ -30,7 +30,7 @@ class RequestController extends Controller
 
         $this->validatorRules = [
             'reason'        => 'string|required',
-            // 'image'         => 'image|nullable',
+            'image'         => 'image|nullable',
             'description'   => 'string|required',
             'amount'        => 'required|numeric|regex:/^[\d]{0,11}(\.[\d]{1,2})?$/', /* 0 to 11 digits and 2 optional decimals */
         ];
@@ -52,7 +52,7 @@ class RequestController extends Controller
 
             if ($request->file('image')) {
                 $file_name = time().'-'.$this->requestUser->name.'-'.$request->file('image')->getClientOriginalName();
-                $file_path = $request->file('image')->storeAs('uploads', $file_name, 'public');
+                $file_path = $request->file('image')->storeAs('reference', $file_name, 'public');
                 $this->requestUser->image = '/storage/' . $file_path;
             }
 
