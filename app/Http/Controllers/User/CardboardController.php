@@ -5,13 +5,11 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\{
-    DB,
-    Validator
-};
+use Illuminate\Support\Facades\DB;
 use App\Traits\{
     ResponseTrait,
-    SeriateTrait
+    SeriateTrait,
+    ValidatorTrait
 };
 use App\Models\{
     MatrixGroup,
@@ -21,16 +19,15 @@ use App\Models\{
 
 class CardboardController extends Controller
 {
-    use ResponseTrait, SeriateTrait;
+    use ResponseTrait, SeriateTrait, ValidatorTrait;
 
     protected $serial;
     protected $user;
     protected $rules;
     protected $cardboard;
+    protected $matrixGroup;
 
-    protected $validationRules = [
-        'matrices' => 'array|required'
-    ];
+    protected $validatorRules = [];
 
     public function __construct() {
         $this->user     = auth()->guard('api')->user();
@@ -62,10 +59,14 @@ class CardboardController extends Controller
             return response()->json($this->invalidRequest());
         }
 
-        $validator = Validator::make($request->all(), $this->validationRules);
+        $this->validatorRules = [
+            'matrices' => 'array|required'
+        ];
+
+        $validator = $this->validator($request->all(), $this->validatorRules, class_basename($this));
 
         if ($validator->fails()) {
-            return response()->json($this->validationFail($validator->errors()));
+            return $this->validationFail($validator->errors());
         }
 
         try {
@@ -165,5 +166,79 @@ class CardboardController extends Controller
         }
 
         return 'done';
+    }
+
+    public function listCardboard(Request $request) {
+        if (!$request->ajax()) {
+            return response()->json($this->invalidRequest());
+        }
+
+        try {
+            $search = "jhjhjhfgfdrt";
+            $this->matrixGroup = MatrixGroup::select(
+                'id',
+                'vip',
+                'expiration_date as expirationDate',
+                DB::raw("datediff(expiration_date, now()) as dayElapsed")
+            )
+            ->with([
+                'matrices' => function ($query) use ($search) {
+                    $query->select(
+                        'matrix_group_id',
+                        'cardboards'
+                        // DB::raw("JSON_EXTRACT(cardboards,'$[*].cardboard') as cardboard")
+                    )
+                    ->whereRaw("`cardboards`->>'$[*].serial' != ?", ["$search"])
+                    ->get();
+                }
+            ])
+            ->where('vip', false)
+            ->first();
+        } catch (\Exception $e) {
+            return response()->json($this->serverError($e));
+        }
+
+        return response()->json($this->success($this->matrixGroup));
+    }
+
+    public function buyCardboard(Request $request) {
+        if (!$request->ajax()) {
+            return response()->json($this->invalidRequest());
+        }
+
+        $this->validatorRules = [
+            'amount'    => 'integer|required',
+            'groupId'   => 'array|required'
+        ];
+
+        $validator = $this->validator($request->all(), $this->validatorRules, class_basename($this));
+
+        if ($validator->fails()) {
+            return $this->validationFail($validator->errors());
+        }
+
+        $this->matrixGroup = MatrixGroup::select(
+            'id',
+            'vip',
+            'expiration_date as expirationDate',
+            DB::raw("datediff(expiration_date, now()) as dayElapsed")
+        )
+        ->with([
+            'matrices' => function ($query) {
+                $query->whereRaw("cardboards->>'$[*].id' = 1");
+            }
+        ])
+        ->where('vip', false)
+        ->first();
+        try {
+
+            if (isset($this->matrixGroup->dayElapsed) && $this->matrixGroup->dayElapsed < 0) {
+
+            }
+        } catch (\Exception $e) {
+            return response()->json($this->serverError($e));
+        }
+
+        return response()->json($this->success($this->matrixGroup));
     }
 }

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\{
     SoftDeletes
 };
 
-class Profile extends Model
+class Request extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -18,26 +18,16 @@ class Profile extends Model
      * @var array
      */
     protected $fillable = [
-        'name',
-        'last_name',
-        'nick_name',
-        'profile_image',
-        'language',
-        'country',
-        'user_id'
+        'reason',
+        'description',
+        'status',
+        'user_id',
+        'amount',
+        'image'
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function getImageAttribute($value)
-    {
-        if ($value) {
-            return asset('storage/uploads/' . $value);
-        } else {
-            return asset('storage/uploads/bnb.png');
-        }
     }
 }
