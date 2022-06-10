@@ -5,10 +5,11 @@ use App\Http\Controllers\AuthController;
 
 // Folder Admin
 use App\Http\Controllers\Admin\{
-    MatrixController
+    MatrixController,
+    GamersController
 };
 
-// Folder Admin
+// Folder PlayAssistant
 use App\Http\Controllers\PlayAssistant\{
     RequestController
 };
@@ -35,7 +36,7 @@ Route::group([
     
     // handle reset password form process
     Route::post('reset/password', [AuthController::class, 'callResetPassword']);
-    
+    Route::get('gamers', [GamersController::class, 'index']);
     Route::group([
         'middleware' => 'auth:api',
     ], function () {
@@ -43,7 +44,7 @@ Route::group([
 
         // User
         Route::get('/user', [AuthController::class, 'user']);
-
+        
         // Group route: Admin
         Route::group([
             'prefix' => 'admin',
@@ -52,6 +53,9 @@ Route::group([
             // Matrix
             Route::get('matrices', [MatrixController::class, 'index']);
             Route::post('matrices', [MatrixController::class, 'store']);
+
+            //Gamers
+           
         });
 
         // Group route: User
