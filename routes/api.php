@@ -52,6 +52,9 @@ Route::group([
             // Matrix
             Route::get('matrices', [MatrixController::class, 'index']);
             Route::post('matrices', [MatrixController::class, 'store']);
+
+            // List cardboards VIP
+            Route::get('matrices/vip', [MatrixController::class, 'listCardboardVip']);
         });
 
         // Group route: User
