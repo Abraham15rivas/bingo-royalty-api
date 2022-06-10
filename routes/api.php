@@ -41,6 +41,9 @@ Route::group([
     ], function () {
         Route::get('/logout', [AuthController::class, 'logout']);
 
+        // User
+        Route::get('/user', [AuthController::class, 'user']);
+
         // Group route: Admin
         Route::group([
             'prefix' => 'admin',
@@ -56,8 +59,6 @@ Route::group([
             'prefix' => 'user',
             'middleware' => 'user',
         ], function () {
-            // User
-            Route::get('/',   [AuthController::class, 'user']);
 
             // Profile
             Route::prefix('profile')->group(function () {

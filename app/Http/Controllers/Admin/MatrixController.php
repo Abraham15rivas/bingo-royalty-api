@@ -44,6 +44,7 @@ class MatrixController extends Controller
                 'expiration_date as expirationDate',
                 DB::raw("datediff(expiration_date, now()) as dayElapsed")
             )
+            ->where('expiration_date', '>', Carbon::now())
             ->with('matrices')
             ->get();
         } catch (\Exception $e) {
@@ -72,6 +73,7 @@ class MatrixController extends Controller
                 DB::raw("datediff(expiration_date, now()) as dayElapsed")
             )
             ->where('vip', false)
+            ->where('expiration_date', '>', Carbon::now())
             ->orderByDesc('expiration_date')
             ->first();
 
