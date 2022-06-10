@@ -6,14 +6,14 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\Profile;
+use Illuminate\Support\Facades\Validator;
 
 class UserProfileController extends Controller
-{
+{    
     public function show(Request $request)
     {
         try {
-            $id = $request->user()->id;
-            $profile = Profile::where('user_id', $id)->get();        
+            $profile = Profile::where('user_id', $request->user()->id)->first();        
         } catch (\Throwable $th) {
             $this->reportError($th);
             $statusCode = 1;
@@ -34,12 +34,25 @@ class UserProfileController extends Controller
             'last_name' => 'required',
             'nick_name' => 'required',
             'country' => 'required',
-            'profile_image' => 'required|mimes:jpg,jpeg,png|max:2048'
+            'profile_image' => 'mimes:jpg,jpeg,png|max:2048'
         ]);
 
+        $customMessages = [
+            'required'  => 'El :attribute es requerido.',
+            'mimes'   => 'El tipo de imagen debe ser jpg, jpeg o png.',
+        ];
+
+        $validator = Validator::make($validatedData, $customMessages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false, 
+                'error' => $validator->messages()
+            ]);
+        } 
+
         try {
-            $profile = Profile::where('user_id', $request->user()->id)->get();
-            $profile = $profile[0];
+            $profile = Profile::where('user_id', $request->user()->id)->first();
             
             $profile->name = $request->name;
             $profile->last_name = $request->last_name;
@@ -49,7 +62,7 @@ class UserProfileController extends Controller
             if($request->file('profile_image')) {
                 $file_name = $profile->name.'-'.$request->file('profile_image')->getClientOriginalName();
                 $file_path = $request->file('profile_image')->storeAs('uploads', $file_name, 'public');
-                $profile->profile_image = 'storage/' . $file_path;
+                $profile->profile_image = '/storage/' . $file_path;
             }
 
             $profile->save();

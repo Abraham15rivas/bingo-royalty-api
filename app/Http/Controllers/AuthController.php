@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
+use App\Models\{User, Profile};
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 use Illuminate\Foundation\Auth\ResetsPasswords;
@@ -21,29 +21,45 @@ class AuthController extends Controller
         $rules =[
             'name'     => 'required',
             'email'    => 'required|string|unique:users',
-            'password' => 'required|string|confirmed'
+            'password' => 'min:6|confirmed',
         ];
 
         $customMessages = [
-            'required' => 'The :attribute field is required.'
+            'required'  => 'El :attribute es requerido.',
+            'confirmed' => 'Las contraseñas no coinciden.',
+            'min'   => 'El :attribute debe ser mayor a 6 caracteres.',
+            'unique'    => 'El correo electrónico ya esta siendo utilizado.'
         ];
 
-        $input     = $request->only('name', 'email','password');
-        $validator = Validator::make($input, $rules);
-    
+        $input     = $request->only('name', 'email','password', 'password_confirmation');
+        $validator = Validator::make($input, $rules, $customMessages);
+
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'error' => $validator->messages()]);
+            return response()->json([
+                'success' => false, 
+                'error' => $validator->messages()
+            ]);
         } else {
             $user = new User([
                 'name'     => $request->name,
                 'email'    => $request->email,
                 'password' => bcrypt($request->password),
-                'role_id'  => 1
+                'role_id'  => 3
             ]);
 
             $user->save();
+
+            $profile = Profile::create([
+                'user_id' => $user->id,
+                'name'    => $request->name,
+            ]);
+
+            $profile->save();
             
-            return response()->json(['message' => 'Successfully created user!'], 201);
+            return response()->json([
+                'success' => true, 
+                'message' => 'Usuario creado correctamente!'
+            ], 201);
         }
     }
 
