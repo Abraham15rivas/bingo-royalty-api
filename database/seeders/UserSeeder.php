@@ -41,10 +41,10 @@ class UserSeeder extends Seeder
             'role_id'   => 4
         ]);
         
-        // Monitor
+        // Supervisor
         User::create([
-            'name'      => 'Monitor',
-            'email'     => 'monitor@test.com',
+            'name'      => 'Supervisor',
+            'email'     => 'supervisor@test.com',
             'password'  => Hash::make('secret123'),
             'role_id'   => 5
         ]);

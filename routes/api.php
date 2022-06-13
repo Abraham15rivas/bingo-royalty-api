@@ -91,10 +91,18 @@ Route::group([
             Route::post('request', [RequestControllerUser::class, 'store']);
         });
 
-        // Group route: User
+        // Group route: play-assistant
         Route::group([
             'prefix' => 'play-assistant',
             'middleware' => 'playAssistant',
+        ], function () {
+            // code ...
+        });
+
+        // Group route: Supervisor
+        Route::group([
+            'prefix' => 'supervisor',
+            'middleware' => 'supervisor',
         ], function () {
             // Request
             Route::get('requests', [RequestController::class, 'index']);
