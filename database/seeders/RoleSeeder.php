@@ -19,7 +19,7 @@ class RoleSeeder extends Seeder
             ['Admin', 'Administrador'],
             ['User', 'Usuarios jugadores'],
             ['PlayAssistant', 'Asistente de jugada'],
-            ['Monitor', 'Monitor']
+            ['Supervisor', 'Supervisor']
         ];
 
         foreach ($roles as $role) {
