@@ -9,8 +9,8 @@ use App\Http\Controllers\Admin\{
     GamersController
 };
 
-// Folder PlayAssistant
-use App\Http\Controllers\PlayAssistant\{
+// Folder Supervisor
+use App\Http\Controllers\Supervisor\{
     RequestController
 };
 
