@@ -117,6 +117,7 @@ class AuthController extends Controller
     {
         try {
             $user = $request->user();
+            $user->profile;
         } catch (\Throwable $th) {
             $statusCode = 1;
             $msg = 'Hubo un error';

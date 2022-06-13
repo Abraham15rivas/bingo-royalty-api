@@ -36,7 +36,9 @@ Route::group([
     
     // handle reset password form process
     Route::post('reset/password', [AuthController::class, 'callResetPassword']);
+    
     Route::get('gamers', [GamersController::class, 'index']);
+
     Route::group([
         'middleware' => 'auth:api',
     ], function () {
@@ -56,6 +58,8 @@ Route::group([
 
             //Gamers
            
+            // List cardboards VIP
+            Route::get('matrices/vip', [MatrixController::class, 'listCardboardVip']);
         });
 
         // Group route: User

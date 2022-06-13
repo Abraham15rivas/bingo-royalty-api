@@ -109,7 +109,8 @@ class CardboardController extends Controller
                     'id'            => ($i + 1),
                     'serial'        => $this->serial,
                     'cardboard'     => $cardboard,
-                    'numberOfPlays' => 20
+                    'numberOfPlays' => 20,
+                    'winer'         => false
                 ]);
             } else {
                 return $assignCardboard;
@@ -174,25 +175,25 @@ class CardboardController extends Controller
         }
 
         try {
-            $search = "jhjhjhfgfdrt";
+            $search = "";
             $this->matrixGroup = MatrixGroup::select(
                 'id',
                 'vip',
                 'expiration_date as expirationDate',
-                DB::raw("datediff(expiration_date, now()) as dayElapsed")
+                DB::raw("extract(day from (expiration_date::timestamp - CURRENT_DATE::timestamp))::int as dayElapsed")
             )
             ->with([
                 'matrices' => function ($query) use ($search) {
                     $query->select(
                         'matrix_group_id',
-                        'cardboards'
-                        // DB::raw("JSON_EXTRACT(cardboards,'$[*].cardboard') as cardboard")
+                        'cardboards',
                     )
-                    ->whereRaw("`cardboards`->>'$[*].serial' != ?", ["$search"])
+                    ->whereRaw("cardboards->>'[*].serial'::text = ?::text", ["$search"])
                     ->get();
                 }
             ])
             ->where('vip', false)
+            ->where('expiration_date', '>', Carbon::now())
             ->first();
         } catch (\Exception $e) {
             return response()->json($this->serverError($e));
@@ -221,7 +222,7 @@ class CardboardController extends Controller
             'id',
             'vip',
             'expiration_date as expirationDate',
-            DB::raw("datediff(expiration_date, now()) as dayElapsed")
+            DB::raw("extract(day from (expiration_date::timestamp - CURRENT_DATE::timestamp))::int as dayElapsed")
         )
         ->with([
             'matrices' => function ($query) {

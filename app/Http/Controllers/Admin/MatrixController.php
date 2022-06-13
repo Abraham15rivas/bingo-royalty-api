@@ -42,7 +42,7 @@ class MatrixController extends Controller
                 'id',
                 'vip',
                 'expiration_date as expirationDate',
-                DB::raw("datediff(expiration_date, now()) as dayElapsed")
+                DB::raw("extract(day from (expiration_date::timestamp - CURRENT_DATE::timestamp))::int as dayElapsed")
             )
             ->where('expiration_date', '>', Carbon::now())
             ->with('matrices')
@@ -70,7 +70,7 @@ class MatrixController extends Controller
                 'id',
                 'vip',
                 'expiration_date as expirationDate',
-                DB::raw("datediff(expiration_date, now()) as dayElapsed")
+                DB::raw("extract(day from (expiration_date::timestamp - CURRENT_DATE::timestamp))::int as dayElapsed")
             )
             ->where('vip', false)
             ->where('expiration_date', '>', Carbon::now())
@@ -130,7 +130,8 @@ class MatrixController extends Controller
             $matrix->push([
                 'id'        => ($i + 1),
                 'serial'    =>  '',
-                'cardboard' => $cardboard
+                'cardboard' => $cardboard,
+                'winer'     => false
             ]);
         }
 
