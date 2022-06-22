@@ -22,9 +22,9 @@ class GamersController extends Controller
 
     public function index(Request $request)
     {
-        // if (!$request->ajax()) {
-        //     return response()->json($this->invalidRequest());
-        // }
+        if (!$request->ajax()) {
+            return response()->json($this->invalidRequest());
+        }
 
         try {
             $gamers = User::where('role_id', '=', 3)->get();
@@ -35,6 +35,24 @@ class GamersController extends Controller
             'statusCode' => isset($statusCode) ? $statusCode : 0,
             'message' => isset($msg) ? $msg : 'Success',
             'gamers' => isset($gamers) ? $gamers : $gamers
+        ]);
+    }
+
+    public function show(Request $request, $id)
+    {
+        if (!$request->ajax()) {
+            return response()->json($this->invalidRequest());
+        }
+
+        try {
+            $gamer = User::findOrFail($id);
+        } catch (\Exception $e) {
+            return response()->json($this->serverError($e));
+        }
+        return response()->json([
+            'statusCode' => isset($statusCode) ? $statusCode : 0,
+            'message' => isset($msg) ? $msg : 'Success',
+            'gamer' => isset($gamer) ? $gamer : $gamer
         ]);
     }
 }

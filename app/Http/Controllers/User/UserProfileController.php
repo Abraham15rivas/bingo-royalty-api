@@ -34,7 +34,7 @@ class UserProfileController extends Controller
             'last_name' => 'required',
             'nick_name' => 'required',
             'country' => 'required',
-            'profile_image' => 'mimes:jpg,jpeg,png|max:2048'
+            'profile_image' => 'mimes:jpg,jpeg,png|max:2048|nullable'
         ]);
 
         $customMessages = [
@@ -61,7 +61,7 @@ class UserProfileController extends Controller
 
             if($request->file('profile_image')) {
                 $file_name = $profile->name.'-'.$request->file('profile_image')->getClientOriginalName();
-                $file_path = $request->file('profile_image')->storeAs('uploads', $file_name, 'public');
+                $file_path = $request->file('profile_image')->storeAs('profile', $file_name, 'public');
                 $profile->profile_image = '/storage/' . $file_path;
             }
 

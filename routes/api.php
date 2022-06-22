@@ -6,7 +6,7 @@ use App\Http\Controllers\AuthController;
 // Folder Admin
 use App\Http\Controllers\Admin\{
     MatrixController,
-    GamersController
+    GamersController,
 };
 
 // Folder Supervisor
@@ -37,7 +37,6 @@ Route::group([
     // handle reset password form process
     Route::post('reset/password', [AuthController::class, 'callResetPassword']);
     
-    Route::get('gamers', [GamersController::class, 'index']);
 
     Route::group([
         'middleware' => 'auth:api',
@@ -56,7 +55,15 @@ Route::group([
             Route::get('matrices', [MatrixController::class, 'index']);
             Route::post('matrices', [MatrixController::class, 'store']);
 
+            // Account
+            // Route::resources(['accounts'  => AccountControllerUser::class]);
+            // Route::put('accounts/active/{id}', [AccountControllerUser::class, 'activeAccount']);
+            // Route::get('accounts/active/', [AccountControllerUser::class, 'show']);
+
             //Gamers
+            Route::get('gamers', [GamersController::class, 'index']);
+            Route::get('gamer/{id}', [GamersController::class, 'show']);
+            Route::put('deactive/gamer/{id}', [GamersController::class, 'deactiveGamer']);
            
             // List cardboards VIP
             Route::get('matrices/vip', [MatrixController::class, 'listCardboardVip']);

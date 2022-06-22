@@ -24,13 +24,13 @@ class RequestController extends Controller
     }
 
     public function store(Request $request) {
-        if (!$request->ajax()) {
-            return response()->json($this->invalidRequest());
-        }
-
+        // if (!$request->ajax()) {
+        //     return response()->json($this->invalidRequest());
+        // }
+        
         $this->validatorRules = [
             'reason'        => 'string|required',
-            'image'         => 'image|nullable',
+            'image'         => 'image|required',
             'description'   => 'string|required',
             'amount'        => 'required|numeric|regex:/^[\d]{0,11}(\.[\d]{1,2})?$/', /* 0 to 11 digits and 2 optional decimals */
         ];
@@ -44,11 +44,12 @@ class RequestController extends Controller
         DB::beginTransaction();
         
         try {
-            $this->requestUser                = new RequestUser();
-            $this->requestUser->reason        = $request->reason;
-            $this->requestUser->description   = $request->description;
-            $this->requestUser->amount        = $request->amount;
-            $this->requestUser->user_id       = $this->user->id;
+            $this->requestUser              = new RequestUser();
+            $this->requestUser->reason      = $request->reason;
+            $this->requestUser->description = $request->description;
+            $this->requestUser->amount      = $request->amount;
+            $this->requestUser->user_id     = $this->user->id;
+            $this->requestUser->status     = 'pendiete';
 
             if ($request->file('image')) {
                 $file_name = time().'-'.$this->requestUser->name.'-'.$request->file('image')->getClientOriginalName();

@@ -195,16 +195,22 @@ class AccountController extends Controller
         ]);
 
         try {
-            $accountDeactive = Account::select('is_active')
-            ->where('user_id', $this->user->id)
-            ->where('is_active', 1)
-            ->update(array(
-                'is_active' => 0,
-            ));
-
-            $account = Account::where('id', $id)
+            if ($this->user->role_id == 2) {
+                $account = Account::where('id', $id)
+                    ->where('user_id', $this->user->id)
+                    ->update(['is_active' => $request->is_active]);
+            } else {
+                $accountDeactive = Account::select('is_active')
                 ->where('user_id', $this->user->id)
-                ->update(['is_active' => $request->is_active]);
+                ->where('is_active', 1)
+                ->update(array(
+                    'is_active' => 0,
+                ));
+
+                $account = Account::where('id', $id)
+                    ->where('user_id', $this->user->id)
+                    ->update(['is_active' => $request->is_active]);
+            }
                
         } catch (\Throwable $th) {
             $statusCode = 1;

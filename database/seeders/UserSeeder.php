@@ -6,7 +6,8 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use App\Models\{
     User,
-    Wallet
+    Wallet,
+    Profile
 };
 
 class UserSeeder extends Seeder
@@ -17,40 +18,39 @@ class UserSeeder extends Seeder
      * @return void
      */
     public function run() {
+        // Coleción de usuarios.
+        $users = collect();
         // SuperAdmin
-        User::create([
+        $users->push(User::create([
             'name'      => 'MasterAdmin',
             'email'     => 'masteradmin@test.com',
             'password'  => Hash::make('secret123'),
             'role_id'   => 1
-        ]);
+        ]));
     
         // Admin 
-        User::create([
+        $users->push(User::create([
             'name'      => 'Admin',
             'email'     => 'admin@test.com',
             'password'  => Hash::make('secret123'),
             'role_id'   => 2
-        ]);
+        ]));
         
         // PlayAssistant
-        User::create([
+        $users->push(User::create([
             'name'      => 'PlayAssistant',
             'email'     => 'playassistant@test.com',
             'password'  => Hash::make('secret123'),
             'role_id'   => 4
-        ]);
+        ]));
         
         // Supervisor
-        User::create([
+        $users->push(User::create([
             'name'      => 'Supervisor',
             'email'     => 'supervisor@test.com',
             'password'  => Hash::make('secret123'),
             'role_id'   => 5
-        ]);
-
-        // Coleción de usuarios.
-        $users = collect();
+        ]));
 
         // User
         $users->push(User::create([
@@ -78,6 +78,7 @@ class UserSeeder extends Seeder
         ]));
 
         $this->createWalletForUsers($users);
+        $this->createProfilesForUsers($users);
     }
 
     private function createWalletForUsers($users) {
@@ -89,6 +90,17 @@ class UserSeeder extends Seeder
             ]);
         }
 
+        return true;
+    }
+
+    private function createProfilesForUsers($users) {
+        foreach ($users as $user) {
+            Profile::create([
+                'name' => $user->name,
+                'profile_image'   => '/storage/profile/user.png',
+                'user_id'   => $user->id
+            ]);
+        }
         return true;
     }
 }
