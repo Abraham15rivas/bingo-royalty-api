@@ -30,4 +30,9 @@ class Request extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function typeRequest()
+    {
+        return $this->belongsTo(TypeRequest::class);
+    }
 }
