@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\DB;
 use App\Traits\{
     ResponseTrait,
     SeriateTrait,
-    ValidatorTrait
+    ValidatorTrait,
+    CardboardTrait
 };
 use App\Models\{
     MatrixGroup,
@@ -19,7 +20,7 @@ use App\Models\{
 
 class CardboardController extends Controller
 {
-    use ResponseTrait, SeriateTrait, ValidatorTrait;
+    use ResponseTrait, SeriateTrait, ValidatorTrait, CardboardTrait;
 
     protected $serial;
     protected $user;
@@ -175,31 +176,32 @@ class CardboardController extends Controller
         }
 
         try {
-            $search = "";
             $this->matrixGroup = MatrixGroup::select(
-                'id',
-                'vip',
-                'expiration_date as expirationDate',
-                DB::raw("extract(day from (expiration_date::timestamp - CURRENT_DATE::timestamp))::int as dayElapsed")
+                'matrix_groups.id',
+                'matrix_groups.vip',
+                'matrix_groups.expiration_date as expirationDate',
+                DB::raw("extract(day from (matrix_groups.expiration_date::timestamp - CURRENT_DATE::timestamp))::int as dayElapsed"),
+                'matrices.cardboards'
             )
-            ->with([
-                'matrices' => function ($query) use ($search) {
-                    $query->select(
-                        'matrix_group_id',
-                        'cardboards',
-                    )
-                    ->whereRaw("cardboards->>'[*].serial'::text = ?::text", ["$search"])
-                    ->get();
-                }
-            ])
-            ->where('vip', false)
-            ->where('expiration_date', '>', Carbon::now())
+            ->join('matrices', 'matrices.matrix_group_id', 'matrix_groups.id')
+            ->where('matrix_groups.vip', false)
+            ->where('matrix_groups.expiration_date', '>', Carbon::now())
             ->first();
+
+            $cardboardResponse = $this->getListCardboard($this->matrixGroup->cardboards);
         } catch (\Exception $e) {
             return response()->json($this->serverError($e));
         }
 
-        return response()->json($this->success($this->matrixGroup));
+        return response()->json(
+            $this->success(
+                $cardboardResponse
+                    ->cardboardObject
+                    ->where('serial', "")
+                    ->values(),
+                    'listCardboards'
+            )
+        );
     }
 
     public function buyCardboard(Request $request) {
