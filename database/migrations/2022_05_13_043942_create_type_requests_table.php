@@ -15,6 +15,8 @@ class CreateTypeRequestsTable extends Migration
     {
         Schema::create('type_requests', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->tetx('description');
             $table->timestamps();
         });
     }
