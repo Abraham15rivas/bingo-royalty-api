@@ -188,20 +188,23 @@ class CardboardController extends Controller
             ->where('matrix_groups.expiration_date', '>', Carbon::now())
             ->first();
 
-            $cardboardResponse = $this->getListCardboard($this->matrixGroup->cardboards);
+            $listCardboards = [];
+
+            if (isset($this->matrixGroup->cardboards)) {
+                $cardboardResponse = $this->getListCardboard($this->matrixGroup->cardboards);
+
+                if ($cardboardResponse->statusCode === 0) {
+                    $listCardboards = $cardboardResponse
+                        ->cardboardObject
+                        ->where('serial', "")
+                        ->values();
+                }
+            }
         } catch (\Exception $e) {
             return response()->json($this->serverError($e));
         }
 
-        return response()->json(
-            $this->success(
-                $cardboardResponse
-                    ->cardboardObject
-                    ->where('serial', "")
-                    ->values(),
-                    'listCardboards'
-            )
-        );
+        return response()->json($this->success($listCardboards, 'listCardboards'));
     }
 
     public function buyCardboard(Request $request) {
