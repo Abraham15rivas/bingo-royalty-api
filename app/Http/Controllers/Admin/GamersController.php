@@ -27,7 +27,8 @@ class GamersController extends Controller
         }
 
         try {
-            $gamers = User::where('role_id', '=', 3)->get();
+            $gamers = User::where('role_id', '=', 3)
+                ->get();
         } catch (\Exception $e) {
             return response()->json($this->serverError($e));
         }

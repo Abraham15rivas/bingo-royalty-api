@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\User;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -34,41 +34,9 @@ class AccountController extends Controller
         }
 
         try {
-            $this->accounts = Account::select(
-                'id',
-                'name',
-                'description',
-                'is_active',
-                'attributes',
-                'type_account'
-            )
-            ->where('user_id', $this->user->id)
-            ->orderBy('is_active', 'DESC')
-            ->get();
-
-        } catch (\Exception $e) {
-            return response()->json($this->serverError($e));
-        }
-
-        return response()->json($this->success($this->accounts, 'accounts'));
-    }
-
-    public function accountsAdmin(Request $request) {
-        if (!$request->ajax()) {
-            return response()->json($this->invalidRequest());
-        }
-
-        try {
-            $this->accounts = Account::select(
-                'id',
-                'name',
-                'attributes',
-                'type_account'
-            )
-            ->where('user_id', 2)
-            ->where('is_active', true)
-            ->orderBy('is_active', 'DESC')
-            ->get();
+            $this->accounts = Account::where('user_id', $this->user->id)
+                ->orderBy('is_active', 'DESC')
+                ->get();
 
         } catch (\Exception $e) {
             return response()->json($this->serverError($e));
@@ -121,10 +89,9 @@ class AccountController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id) {
@@ -167,7 +134,7 @@ class AccountController extends Controller
         return response()->json($this->success([]));
     }
 
-    /**
+     /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
@@ -184,36 +151,6 @@ class AccountController extends Controller
         if($account > 0 ){
             return response()->json(['message'=>'Eliminado correctamente'], 200);
         }
-    }
-
-    public function show(Request $request, $id)
-    {
-        if (!$request->ajax()) {
-            return response()->json($this->invalidRequest());
-        }        
-
-        try {
-            $accountActive = Account::select(
-                'id',
-                'name',
-                'is_active',
-                'type_account',
-                'attributes'
-            )
-            ->where('user_id', $this->user->id)
-            ->where('is_active', 1)
-            ->first();
-
-        } catch (\Throwable $th) {
-            $statusCode = 1;
-            $msg = 'Hubo un error';
-        }
-
-        return response()->json([
-            'statusCode' => isset($statusCode) ? $statusCode : 0,
-            'message' => isset($msg) ? $msg : 'Success',
-            'account' => isset($accountActive) ? $accountActive : $accountActive
-        ]);
     }
 
     public function activeAccount(Request $request, $id)
@@ -240,4 +177,5 @@ class AccountController extends Controller
             'message' => isset($msg) ? $msg : 'Success',
         ]);
     }
+
 }

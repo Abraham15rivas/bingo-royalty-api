@@ -44,12 +44,12 @@ class RequestController extends Controller
         DB::beginTransaction();
         
         try {
-            $this->requestUser              = new RequestUser();
-            $this->requestUser->reason      = $request->reason;
-            $this->requestUser->description = $request->description;
-            $this->requestUser->amount      = $request->amount;
-            $this->requestUser->user_id     = $this->user->id;
-            $this->requestUser->status     = 'pendiete';
+            $this->requestUser                  = new RequestUser();
+            $this->requestUser->reason          = $request->reason;
+            $this->requestUser->description     = $request->description;
+            $this->requestUser->amount          = $request->amount;
+            $this->requestUser->user_id         = $this->user->id;
+            $this->requestUser->type_request_id = 1;
 
             if ($request->file('image')) {
                 $file_name = time().'-'.$this->requestUser->name.'-'.$request->file('image')->getClientOriginalName();

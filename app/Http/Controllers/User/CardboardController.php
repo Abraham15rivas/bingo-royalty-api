@@ -26,6 +26,7 @@ class CardboardController extends Controller
     protected $user;
     protected $rules;
     protected $cardboard;
+    protected $cardboards;
     protected $matrixGroup;
 
     protected $validatorRules = [];
@@ -41,9 +42,10 @@ class CardboardController extends Controller
         }
 
         try {
-            $this->cardboard = UserCardboard::select(
+            $this->cardboards = UserCardboard::select(
                 'serial',
                 'status',
+                'cardboard'
             )
             ->where('user_id', $this->user->id)
             ->orderByDesc('id')
@@ -52,7 +54,7 @@ class CardboardController extends Controller
             return response()->json($this->serverError($e));
         }
 
-        return response()->json($this->success($this->cardboard, 'cardboards'));
+        return response()->json($this->success($this->cardboards, 'cardboards'));
     }
 
     public function store(Request $request) {
@@ -95,9 +97,9 @@ class CardboardController extends Controller
         $matrix         = collect();
 
         for ($i = 0; $i < count($request->matrices); $i++) {
-            $cardboard = $this->cardboardGeneratorVip($request->matrices[$i]);
+            $this->cardboard = $this->cardboardGeneratorVip($request->matrices[$i]);
 
-            if ($cardboard === true) {
+            if ($this->cardboard === true) {
                 return 'Duplicate cardboard, change combination';
             }
 
@@ -109,7 +111,7 @@ class CardboardController extends Controller
                 $matrix->push([
                     'id'            => ($i + 1),
                     'serial'        => $this->serial,
-                    'cardboard'     => $cardboard,
+                    'cardboard'     => $this->cardboard,
                     'numberOfPlays' => 20,
                     'winer'         => false
                 ]);
@@ -158,7 +160,8 @@ class CardboardController extends Controller
             UserCardboard::create([
                 'status'    => 'inGame',
                 'serial'    => $this->serial,
-                'user_id'   => $this->user->id
+                'user_id'   => $this->user->id,
+                'cardboard' => $this->cardboard
             ]);
 
             DB::commit();
@@ -213,13 +216,18 @@ class CardboardController extends Controller
         }
 
         $this->validatorRules = [
-            'id'   => 'integer|required'
+            'id' => 'integer|required'
         ];
 
         $validator = $this->validator($request->all(), $this->validatorRules, class_basename($this));
 
         if ($validator->fails()) {
             return $this->validationFail($validator->errors());
+        }
+
+        if ($this->user->wallet->balance <= 0) {
+            $errors = $this->customValidator(class_basename($this), 'balanceToSend', 'fondos insuficientes.');
+            return response()->json($this->validationFail($errors));
         }
 
         try {
@@ -247,9 +255,10 @@ class CardboardController extends Controller
 
                     $this->serial = $this->generateSeries();
 
-                    foreach ($listCardboards as $cardboard) {
-                        if ($cardboard->id === $request->id) {
-                            $cardboard->serial = $this->serial;
+                    foreach ($listCardboards as $matrixCardboard) {
+                        if ($matrixCardboard->id === $request->id) {
+                            $matrixCardboard->serial = $this->serial;
+                            $this->cardboard = $matrixCardboard->cardboard;
                             break;
                         }
                     }
@@ -260,12 +269,12 @@ class CardboardController extends Controller
                                 'cardboards'
                             )
                             ->find($this->matrixGroup->matrix_id);
-    
+
                         if (!empty($matrix)) {
                             $matrix->update([
                                 'cardboards' => $listCardboards
                             ]);
-    
+
                             $this->assignCardboard();
                         }
                     }

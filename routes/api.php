@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\{
     MatrixController,
     GamersController,
+    AccountController as AccountControllerAdmin,
 };
 
 // Folder Supervisor
@@ -56,9 +57,12 @@ Route::group([
             Route::post('matrices', [MatrixController::class, 'store']);
 
             // Account
-            // Route::resources(['accounts'  => AccountControllerUser::class]);
-            // Route::put('accounts/active/{id}', [AccountControllerUser::class, 'activeAccount']);
-            // Route::get('accounts/active/', [AccountControllerUser::class, 'show']);
+            Route::get('accounts', [AccountControllerAdmin::class, 'index']);
+            //Route::get('account', [AccountControllerAdmin::class, 'show']);
+            Route::post('account', [AccountControllerAdmin::class, 'store']);
+            Route::put('account/update/{id}', [AccountControllerAdmin::class, 'update']);
+            Route::delete ('account/{id}', [AccountControllerAdmin::class, 'destroy']);
+            Route::put('account/active/{id}', [AccountControllerAdmin::class, 'activeAccount']);
 
             //Gamers
             Route::get('gamers', [GamersController::class, 'index']);
@@ -98,6 +102,9 @@ Route::group([
             Route::post('wallet/balance', [WalletControllerUser::class, 'rechargeBalance']);
             Route::put('wallet/balance', [WalletControllerUser::class, 'transferBalance']);
             Route::get('wallet/activity', [WalletControllerUser::class, 'getActivities']);
+
+            //Accounts active admin
+            Route::get('accounts/admin', [AccountControllerUser::class, 'accountsAdmin']);
 
             // Request
             Route::post('request', [RequestControllerUser::class, 'store']);
