@@ -17,6 +17,7 @@ class CreateUserCardboardsTable extends Migration
             $table->id();
             $table->enum('status', ['inGame', 'expired', 'winner']);
             $table->string('serial');
+            $table->json('cardboard');
             $table->foreignId('user_id')
                 ->constrained()
                 ->onUpdate('cascade')
