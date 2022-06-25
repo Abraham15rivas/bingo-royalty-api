@@ -23,7 +23,8 @@ class Request extends Model
         'status',
         'user_id',
         'amount',
-        'image'
+        'image',
+        'type_request_id'
     ];
 
     public function user()
