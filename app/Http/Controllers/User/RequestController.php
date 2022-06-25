@@ -24,9 +24,9 @@ class RequestController extends Controller
     }
 
     public function store(Request $request) {
-        // if (!$request->ajax()) {
-        //     return response()->json($this->invalidRequest());
-        // }
+        if (!$request->ajax()) {
+            return response()->json($this->invalidRequest());
+        }
         
         $this->validatorRules = [
             'reason'        => 'string|required',
