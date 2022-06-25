@@ -49,6 +49,7 @@ class RequestController extends Controller
             $this->requestUser->description     = $request->description;
             $this->requestUser->amount          = $request->amount;
             $this->requestUser->user_id         = $this->user->id;
+            $this->requestUser->status          = 'slope';
             $this->requestUser->type_request_id = 1;
 
             if ($request->file('image')) {

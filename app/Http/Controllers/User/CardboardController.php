@@ -161,7 +161,7 @@ class CardboardController extends Controller
                 'status'    => 'inGame',
                 'serial'    => $this->serial,
                 'user_id'   => $this->user->id,
-                'cardboard' => $this->cardboard
+                'cardboard' => json_encode($this->cardboard)
             ]);
 
             DB::commit();
