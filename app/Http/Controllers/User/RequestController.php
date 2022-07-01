@@ -23,6 +23,38 @@ class RequestController extends Controller
         $this->user = auth()->guard('api')->user();
     }
 
+    public function index(Request $request)
+    {
+        if (!$request->ajax()) {
+            return response()->json($this->invalidRequest());
+        }
+
+    //    try {
+            $this->requestUser = RequestUser::select(
+                'reason',
+                'image',
+                'amount',
+                'status',
+                'type_request_id',
+                'created_at',
+            )
+            ->where('user_id', $this->user->id)
+            ->with('typeRequest')
+            ->orderByDesc('created_at')
+            ->get();
+
+        // } catch (\Throwable $th) {
+            // $statusCode = 1;
+            // $msg = 'Hubo un error';
+        // }
+   
+        return response()->json([
+            'statusCode' => isset($statusCode) ? $statusCode : 0,
+            'message' => isset($msg) ? $msg : 'Success',
+            'requestUser' => isset($this->requestUser) ? $this->requestUser : null,
+        ]);
+    }
+
     public function store(Request $request) {
         if (!$request->ajax()) {
             return response()->json($this->invalidRequest());

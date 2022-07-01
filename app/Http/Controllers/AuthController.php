@@ -22,10 +22,12 @@ class AuthController extends Controller
 {
     public function signup(Request $request)
     {
+        
         $rules =[
-            'name'     => 'required',
-            'email'    => 'required|string|unique:users',
-            'password' => 'min:6|confirmed',
+            'name'          => 'required',
+            'email'         => 'required|string|unique:users',
+            'password'      => 'min:6|confirmed',
+            'referral_code' => 'string',
         ];
 
         $customMessages = [
@@ -49,9 +51,11 @@ class AuthController extends Controller
                     'name'     => $request->name,
                     'email'    => $request->email,
                     'password' => bcrypt($request->password),
+                    'referral_code' => User::getUniqueReferralCode(),
+                    'referred_by' => $this->getReferredBy($request->referral_code),
                     'role_id'  => 3
                 ]);
-
+                
                 $user->save();
 
                 $profile = Profile::create([
@@ -82,6 +86,14 @@ class AuthController extends Controller
         }
     }
 
+    private function getReferredBy($referralCode)
+    {
+        if ($referralCode)
+            return User::where('referral_code', $referralCode)->value('id');
+
+        return null;
+    }
+
     public function login(Request $request)
     {
         
@@ -94,7 +106,22 @@ class AuthController extends Controller
         $credentials = $request->only(['email', 'password']);
 
         if (Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
+
             $user = User::find(Auth::user()->id);
+
+            if (!$user->is_active) {
+
+                $user = null;
+                $msg = 'Su cuenta se encuentra desactivada - bingo@support.com';
+                $statusCode = 1;
+
+                return response()->json([
+                    'statusCode' => $statusCode,
+                    'message' => $msg,
+                    'user' => $user 
+                ]);
+            }
+
             $msg = 'Usuario logeado con exito';
             $statusCode = 0;
         } else {
@@ -104,9 +131,6 @@ class AuthController extends Controller
         }
 
         if ($user) {
-            /*if ($user->role_id === 3) {
-                $this->revokeSessionToken($user->id);
-            }*/
             $tokenResult = $user->createToken('Token de usuario');
             $token = $tokenResult->token;
             $token->expires_at = Carbon::now()->addWeeks(1);

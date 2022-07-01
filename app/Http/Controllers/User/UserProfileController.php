@@ -5,13 +5,24 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-use App\Models\Profile;
+use App\Models\{Profile, User};
 use Illuminate\Support\Facades\Validator;
+
+use App\Traits\{
+    ResponseTrait,
+    ValidatorTrait
+};
 
 class UserProfileController extends Controller
 {    
+    use ResponseTrait, ValidatorTrait;
+
     public function show(Request $request)
     {
+        if (!$request->ajax()) {
+            return response()->json($this->invalidRequest());
+        }  
+        
         try {
             $profile = Profile::where('user_id', $request->user()->id)->first();        
         } catch (\Throwable $th) {
@@ -29,6 +40,10 @@ class UserProfileController extends Controller
 
     public function store(Request $request)
     { 
+        if (!$request->ajax()) {
+            return response()->json($this->invalidRequest());
+        }  
+
         $validatedData = $request->validate([
             'name' => 'required',
             'last_name' => 'required',
@@ -76,6 +91,54 @@ class UserProfileController extends Controller
             'statusCode' => isset($statusCode) ? $statusCode : 0,
             'message' => isset($msg) ? $msg : 'Success',
             'user' => isset($profile) ? $profile : (object) []
+        ]);
+    }
+
+    public function notifications (Request $request)
+    {
+        if (!$request->ajax()) {
+            return response()->json($this->invalidRequest());
+        }        
+
+        try {
+            $user = Profile::where('user_id', $request->user()->id)
+                ->first();
+            $user->notifications = !$user->notifications;
+            $user->save();
+            
+        } catch (\Throwable $th) {
+            $statusCode = 1;
+            $msg = 'Hubo un error';
+        }
+
+        return response()->json([
+            'statusCode' => isset($statusCode) ? $statusCode : 0,
+            'message' => isset($msg) ? $msg : 'Success',
+            'notification' => $user->notifications
+        ]);
+    }
+
+    public function disableAccount (Request $request)
+    {
+        if (!$request->ajax()) {
+            return response()->json($this->invalidRequest());
+        }        
+
+        try {
+            $user = User::where('id', $request->user()->id)
+                ->first();
+            $user->is_active = false;
+            $user->save();
+            
+        } catch (\Throwable $th) {
+            $statusCode = 1;
+            $msg = 'Hubo un error';
+        }
+
+        return response()->json([
+            'statusCode' => isset($statusCode) ? $statusCode : 0,
+            'message' => isset($msg) ? $msg : 'Success',
+            'user' => $user->is_active
         ]);
     }
 }

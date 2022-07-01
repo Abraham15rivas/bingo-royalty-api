@@ -20,7 +20,9 @@ use App\Http\Controllers\User\{
     CardboardController as CardboardControllerUser,
     WalletController as WalletControllerUser,
     AccountController as AccountControllerUser,
+    ChangePasswordController,
     UserProfileController,
+    ReferralController,
     RequestController as RequestControllerUser
 };
 
@@ -37,7 +39,6 @@ Route::group([
     
     // handle reset password form process
     Route::post('reset/password', [AuthController::class, 'callResetPassword']);
-    
 
     Route::group([
         'middleware' => 'auth:api',
@@ -82,8 +83,20 @@ Route::group([
             // Profile
             Route::prefix('profile')->group(function () {
                 Route::get('/', [UserProfileController::class, 'show']);
-                Route::post('/store', [UserProfileController::class, 'store']);
+                Route::post('store', [UserProfileController::class, 'store']);
 
+                // Active - Deactive notifications
+                Route::put('notifications', [UserProfileController::class, 'notifications']);
+
+                // Referral
+                Route::get('/r/{referralCode}',  [ReferralController::class, 'link']);
+                
+                // Disable account
+                Route::put('disableAccount', [UserProfileController::class, 'disableAccount']);
+
+                // Change Password
+                Route::post('change-password', [ChangePasswordController::class, 'store']);
+                
                 // Account
                 Route::resources(['accounts'  => AccountControllerUser::class]);
                 Route::put('accounts/active/{id}', [AccountControllerUser::class, 'activeAccount']);
@@ -103,10 +116,11 @@ Route::group([
             Route::put('wallet/balance', [WalletControllerUser::class, 'transferBalance']);
             Route::get('wallet/activity', [WalletControllerUser::class, 'getActivities']);
 
-            //Accounts active admin
+            //Accounts active by admin
             Route::get('accounts/admin', [AccountControllerUser::class, 'accountsAdmin']);
 
-            // Request
+            // Requests
+            Route::get('requests', [RequestControllerUser::class, 'index']);
             Route::post('request', [RequestControllerUser::class, 'store']);
         });
 

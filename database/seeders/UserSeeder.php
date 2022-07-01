@@ -25,6 +25,7 @@ class UserSeeder extends Seeder
             'name'      => 'MasterAdmin',
             'email'     => 'masteradmin@test.com',
             'password'  => Hash::make('secret123'),
+            'referral_code' => User::getUniqueReferralCode(),
             'role_id'   => 1
         ]));
     
@@ -33,6 +34,7 @@ class UserSeeder extends Seeder
             'name'      => 'Admin',
             'email'     => 'admin@test.com',
             'password'  => Hash::make('secret123'),
+            'referral_code' => User::getUniqueReferralCode(),
             'role_id'   => 2
         ]));
         
@@ -41,6 +43,7 @@ class UserSeeder extends Seeder
             'name'      => 'PlayAssistant',
             'email'     => 'playassistant@test.com',
             'password'  => Hash::make('secret123'),
+            'referral_code' => User::getUniqueReferralCode(),
             'role_id'   => 4
         ]));
         
@@ -49,6 +52,7 @@ class UserSeeder extends Seeder
             'name'      => 'Supervisor',
             'email'     => 'supervisor@test.com',
             'password'  => Hash::make('secret123'),
+            'referral_code' => User::getUniqueReferralCode(),
             'role_id'   => 5
         ]));
 
@@ -57,6 +61,7 @@ class UserSeeder extends Seeder
             'name'      => 'Diego',
             'email'     => 'diego@test.com',
             'password'  => Hash::make('secret123'),
+            'referral_code' => User::getUniqueReferralCode(),
             'role_id'   => 3
         ]));
         
@@ -65,6 +70,7 @@ class UserSeeder extends Seeder
             'name'      => 'Abraham',
             'email'     => 'abraham@test.com',
             'password'  => Hash::make('secret123'),
+            'referral_code' => User::getUniqueReferralCode(),
             'role_id'   => 3
         ]));
 
@@ -74,6 +80,7 @@ class UserSeeder extends Seeder
             'email'     => 'jose@test.com',
             'vip'       => true,
             'password'  => Hash::make('secret123'),
+            'referral_code' => User::getUniqueReferralCode(),
             'role_id'   => 3
         ]));
 
