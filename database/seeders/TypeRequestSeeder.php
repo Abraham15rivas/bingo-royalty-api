@@ -3,9 +3,9 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Role;
+use App\Models\TypeRequest;
 
-class RoleSeeder extends Seeder
+class TypeRequestSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -15,15 +15,13 @@ class RoleSeeder extends Seeder
     public function run()
     {
         $roles = [
-            ['MasterAdmin', 'Master Admin'],
-            ['Admin', 'Administrador'],
-            ['User', 'Usuarios jugadores'],
-            ['PlayAssistant', 'Asistente de jugada'],
-            ['Supervisor', 'Supervisor']
+            ['Top up balance', 'Recarga de saldo'],
+            ['Balance withdrawal', 'Retiro de saldo'],
+            ['VIP subscription', 'Suscripción VIP']
         ];
 
         foreach ($roles as $role) {
-            Role::create([
+            TypeRequest::create([
                 'name'          => $role[0],
                 'description'   => $role[1]
             ]);

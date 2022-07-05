@@ -20,7 +20,8 @@ class UserCardboard extends Model
     protected $fillable = [
         'status',
         'serial',
-        'user_id'
+        'user_id',
+        'cardboard'
     ];
 
     public function user()

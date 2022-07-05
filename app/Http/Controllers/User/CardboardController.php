@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\DB;
 use App\Traits\{
     ResponseTrait,
     SeriateTrait,
-    ValidatorTrait
+    ValidatorTrait,
+    CardboardTrait
 };
 use App\Models\{
     MatrixGroup,
@@ -19,12 +20,13 @@ use App\Models\{
 
 class CardboardController extends Controller
 {
-    use ResponseTrait, SeriateTrait, ValidatorTrait;
+    use ResponseTrait, SeriateTrait, ValidatorTrait, CardboardTrait;
 
     protected $serial;
     protected $user;
     protected $rules;
     protected $cardboard;
+    protected $cardboards;
     protected $matrixGroup;
 
     protected $validatorRules = [];
@@ -40,9 +42,10 @@ class CardboardController extends Controller
         }
 
         try {
-            $this->cardboard = UserCardboard::select(
+            $this->cardboards = UserCardboard::select(
                 'serial',
                 'status',
+                'cardboard'
             )
             ->where('user_id', $this->user->id)
             ->orderByDesc('id')
@@ -51,7 +54,7 @@ class CardboardController extends Controller
             return response()->json($this->serverError($e));
         }
 
-        return response()->json($this->success($this->cardboard, 'cardboards'));
+        return response()->json($this->success($this->cardboards, 'cardboards'));
     }
 
     public function store(Request $request) {
@@ -94,9 +97,9 @@ class CardboardController extends Controller
         $matrix         = collect();
 
         for ($i = 0; $i < count($request->matrices); $i++) {
-            $cardboard = $this->cardboardGeneratorVip($request->matrices[$i]);
+            $this->cardboard = $this->cardboardGeneratorVip($request->matrices[$i]);
 
-            if ($cardboard === true) {
+            if ($this->cardboard === true) {
                 return 'Duplicate cardboard, change combination';
             }
 
@@ -108,8 +111,9 @@ class CardboardController extends Controller
                 $matrix->push([
                     'id'            => ($i + 1),
                     'serial'        => $this->serial,
-                    'cardboard'     => $cardboard,
-                    'numberOfPlays' => 20
+                    'cardboard'     => $this->cardboard,
+                    'numberOfPlays' => 20,
+                    'winer'         => false
                 ]);
             } else {
                 return $assignCardboard;
@@ -156,7 +160,8 @@ class CardboardController extends Controller
             UserCardboard::create([
                 'status'    => 'inGame',
                 'serial'    => $this->serial,
-                'user_id'   => $this->user->id
+                'user_id'   => $this->user->id,
+                'cardboard' => json_encode($this->cardboard)
             ]);
 
             DB::commit();
@@ -174,31 +179,35 @@ class CardboardController extends Controller
         }
 
         try {
-            $search = "jhjhjhfgfdrt";
             $this->matrixGroup = MatrixGroup::select(
-                'id',
-                'vip',
-                'expiration_date as expirationDate',
-                DB::raw("datediff(expiration_date, now()) as dayElapsed")
+                'matrix_groups.id',
+                'matrix_groups.vip',
+                'matrix_groups.expiration_date as expirationDate',
+                DB::raw("extract(day from (matrix_groups.expiration_date::timestamp - CURRENT_DATE::timestamp))::int as dayElapsed"),
+                'matrices.cardboards'
             )
-            ->with([
-                'matrices' => function ($query) use ($search) {
-                    $query->select(
-                        'matrix_group_id',
-                        'cardboards'
-                        // DB::raw("JSON_EXTRACT(cardboards,'$[*].cardboard') as cardboard")
-                    )
-                    ->whereRaw("`cardboards`->>'$[*].serial' != ?", ["$search"])
-                    ->get();
-                }
-            ])
-            ->where('vip', false)
+            ->join('matrices', 'matrices.matrix_group_id', 'matrix_groups.id')
+            ->where('matrix_groups.vip', false)
+            ->where('matrix_groups.expiration_date', '>', Carbon::now())
             ->first();
+
+            $listCardboards = [];
+
+            if (isset($this->matrixGroup->cardboards)) {
+                $cardboardResponse = $this->getListCardboard($this->matrixGroup->cardboards);
+
+                if ($cardboardResponse->statusCode === 0) {
+                    $listCardboards = $cardboardResponse
+                        ->cardboardObject
+                        ->where('serial', "")
+                        ->values();
+                }
+            }
         } catch (\Exception $e) {
             return response()->json($this->serverError($e));
         }
 
-        return response()->json($this->success($this->matrixGroup));
+        return response()->json($this->success($listCardboards, 'listCardboards'));
     }
 
     public function buyCardboard(Request $request) {
@@ -207,8 +216,7 @@ class CardboardController extends Controller
         }
 
         $this->validatorRules = [
-            'amount'    => 'integer|required',
-            'groupId'   => 'array|required'
+            'id' => 'integer|required'
         ];
 
         $validator = $this->validator($request->all(), $this->validatorRules, class_basename($this));
@@ -217,28 +225,65 @@ class CardboardController extends Controller
             return $this->validationFail($validator->errors());
         }
 
-        $this->matrixGroup = MatrixGroup::select(
-            'id',
-            'vip',
-            'expiration_date as expirationDate',
-            DB::raw("datediff(expiration_date, now()) as dayElapsed")
-        )
-        ->with([
-            'matrices' => function ($query) {
-                $query->whereRaw("cardboards->>'$[*].id' = 1");
-            }
-        ])
-        ->where('vip', false)
-        ->first();
+        if ($this->user->wallet->balance <= 0) {
+            $errors = $this->customValidator(class_basename($this), 'balanceToSend', 'fondos insuficientes.');
+            return response()->json($this->validationFail($errors));
+        }
+
         try {
+            $this->matrixGroup = MatrixGroup::select(
+                'matrix_groups.id',
+                'matrix_groups.vip',
+                'matrix_groups.expiration_date as expirationDate',
+                DB::raw("extract(day from (matrix_groups.expiration_date::timestamp - CURRENT_DATE::timestamp))::int as dayElapsed"),
+                'matrices.cardboards',
+                'matrices.id as matrix_id'
+            )
+            ->join('matrices', 'matrices.matrix_group_id', 'matrix_groups.id')
+            ->where('matrix_groups.vip', false)
+            ->where('matrix_groups.expiration_date', '>', Carbon::now())
+            ->first();
 
-            if (isset($this->matrixGroup->dayElapsed) && $this->matrixGroup->dayElapsed < 0) {
+            $listCardboards = [];
 
+            if (isset($this->matrixGroup->cardboards)) {
+                $cardboardResponse = $this->getListCardboard($this->matrixGroup->cardboards);
+
+                if ($cardboardResponse->statusCode === 0) {
+                    $listCardboards = $cardboardResponse
+                        ->cardboardObject;
+
+                    $this->serial = $this->generateSeries();
+
+                    foreach ($listCardboards as $matrixCardboard) {
+                        if ($matrixCardboard->id === $request->id) {
+                            $matrixCardboard->serial = $this->serial;
+                            $this->cardboard = $matrixCardboard->cardboard;
+                            break;
+                        }
+                    }
+
+                    if (isset($this->matrixGroup->matrix_id)) {
+                        $matrix = Matrix::select(
+                                'id',
+                                'cardboards'
+                            )
+                            ->find($this->matrixGroup->matrix_id);
+
+                        if (!empty($matrix)) {
+                            $matrix->update([
+                                'cardboards' => $listCardboards
+                            ]);
+
+                            $this->assignCardboard();
+                        }
+                    }
+                }
             }
         } catch (\Exception $e) {
             return response()->json($this->serverError($e));
         }
 
-        return response()->json($this->success($this->matrixGroup));
+        return response()->json($this->success([]));
     }
 }

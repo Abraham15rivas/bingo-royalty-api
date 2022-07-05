@@ -16,10 +16,11 @@ class CreateProfilesTable extends Migration
         Schema::create('profiles', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('last_name');
-            $table->string('nick_name');
-            $table->string('language');
-            $table->string('country');
+            $table->string('last_name')->nullable();
+            $table->string('nick_name')->nullable();
+            $table->string('language')->nullable();
+            $table->string('country')->nullable();
+            $table->boolean('notifications')->default(true);
             $table->string('profile_image')->nullable();
             $table->foreignId('user_id')
                 ->constrained()

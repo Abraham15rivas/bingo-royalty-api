@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
@@ -22,7 +23,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role_id'
+        'role_id',
+        'referred_by', 
+        'referral_code'
     ];
 
     /**
@@ -42,7 +45,38 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'created_at' => 'datetime:Y-m-d',
+        'updated_at' => 'datetime:Y-m-d',
     ];
+
+    public static function getUniqueReferralCode()
+    {
+        do {
+            $code = Str::random(7);    
+        } while (User::where('referral_code', $code)->exists());
+
+        return $code;
+    }
+
+    private function getReferredBy()
+    {
+        $referralCode = Cookie::get('referral');
+
+        if ($referralCode)
+            return User::where('referral_code', $referralCode)->value('id');
+
+        return null;
+    }
+
+    public function referredBy()
+    {
+        return $this->belongsTo(User::class, 'referred_by');
+    }
+
+    public function referrals()
+    {
+        return $this->hasMany(User::class, 'referred_by');
+    }
 
     public function role()
     {

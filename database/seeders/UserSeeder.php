@@ -6,7 +6,8 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use App\Models\{
     User,
-    Wallet
+    Wallet,
+    Profile
 };
 
 class UserSeeder extends Seeder
@@ -17,46 +18,50 @@ class UserSeeder extends Seeder
      * @return void
      */
     public function run() {
+        // Coleción de usuarios.
+        $users = collect();
         // SuperAdmin
-        User::create([
+        $users->push(User::create([
             'name'      => 'MasterAdmin',
             'email'     => 'masteradmin@test.com',
             'password'  => Hash::make('secret123'),
+            'referral_code' => User::getUniqueReferralCode(),
             'role_id'   => 1
-        ]);
+        ]));
     
         // Admin 
-        User::create([
+        $users->push(User::create([
             'name'      => 'Admin',
             'email'     => 'admin@test.com',
             'password'  => Hash::make('secret123'),
+            'referral_code' => User::getUniqueReferralCode(),
             'role_id'   => 2
-        ]);
+        ]));
         
         // PlayAssistant
-        User::create([
+        $users->push(User::create([
             'name'      => 'PlayAssistant',
             'email'     => 'playassistant@test.com',
             'password'  => Hash::make('secret123'),
+            'referral_code' => User::getUniqueReferralCode(),
             'role_id'   => 4
-        ]);
+        ]));
         
-        // Monitor
-        User::create([
-            'name'      => 'Monitor',
-            'email'     => 'monitor@test.com',
+        // Supervisor
+        $users->push(User::create([
+            'name'      => 'Supervisor',
+            'email'     => 'supervisor@test.com',
             'password'  => Hash::make('secret123'),
+            'referral_code' => User::getUniqueReferralCode(),
             'role_id'   => 5
-        ]);
-
-        // Coleción de usuarios.
-        $users = collect();
+        ]));
 
         // User
         $users->push(User::create([
             'name'      => 'Diego',
             'email'     => 'diego@test.com',
             'password'  => Hash::make('secret123'),
+            'referral_code' => User::getUniqueReferralCode(),
             'role_id'   => 3
         ]));
         
@@ -65,6 +70,7 @@ class UserSeeder extends Seeder
             'name'      => 'Abraham',
             'email'     => 'abraham@test.com',
             'password'  => Hash::make('secret123'),
+            'referral_code' => User::getUniqueReferralCode(),
             'role_id'   => 3
         ]));
 
@@ -74,10 +80,12 @@ class UserSeeder extends Seeder
             'email'     => 'jose@test.com',
             'vip'       => true,
             'password'  => Hash::make('secret123'),
+            'referral_code' => User::getUniqueReferralCode(),
             'role_id'   => 3
         ]));
 
         $this->createWalletForUsers($users);
+        $this->createProfilesForUsers($users);
     }
 
     private function createWalletForUsers($users) {
@@ -89,6 +97,17 @@ class UserSeeder extends Seeder
             ]);
         }
 
+        return true;
+    }
+
+    private function createProfilesForUsers($users) {
+        foreach ($users as $user) {
+            Profile::create([
+                'name' => $user->name,
+                'profile_image'   => '/storage/profile/user.png',
+                'user_id'   => $user->id
+            ]);
+        }
         return true;
     }
 }
