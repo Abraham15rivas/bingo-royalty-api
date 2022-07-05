@@ -177,5 +177,4 @@ class AccountController extends Controller
             'message' => isset($msg) ? $msg : 'Success',
         ]);
     }
-
 }

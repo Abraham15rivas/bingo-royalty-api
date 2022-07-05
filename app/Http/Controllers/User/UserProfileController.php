@@ -141,4 +141,27 @@ class UserProfileController extends Controller
             'user' => $user->is_active
         ]);
     }
+
+    public function userVip(Request $request)
+    {
+        if (!$request->ajax()) {
+            return response()->json($this->invalidRequest());
+        }        
+
+        try {
+            $user = User::where('id', $request->user()->id)
+                ->first();
+            $user->vip = true;
+            $user->save();
+            
+        } catch (\Throwable $th) {
+            $statusCode = 1;
+            $msg = 'Hubo un error';
+        }
+
+        return response()->json([
+            'statusCode' => isset($statusCode) ? $statusCode : 0,
+            'message' => isset($msg) ? $msg : 'Success',
+        ]);
+    }
 }

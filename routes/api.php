@@ -68,7 +68,10 @@ Route::group([
             //Gamers
             Route::get('gamers', [GamersController::class, 'index']);
             Route::get('gamer/{id}', [GamersController::class, 'show']);
+            Route::post('gamer', [GamersController::class, 'store']);
             Route::put('deactive/gamer/{id}', [GamersController::class, 'deactiveGamer']);
+
+            Route::get('roles', [GamersController::class, 'indexRoles']);
            
             // List cardboards VIP
             Route::get('matrices/vip', [MatrixController::class, 'listCardboardVip']);
@@ -88,12 +91,15 @@ Route::group([
                 // Active - Deactive notifications
                 Route::put('notifications', [UserProfileController::class, 'notifications']);
 
-                // Referral
-                Route::get('/r/{referralCode}',  [ReferralController::class, 'link']);
-                
+                // USER VIP
+                Route::put('user-vip', [UserProfileController::class, 'userVip']);
+
                 // Disable account
                 Route::put('disableAccount', [UserProfileController::class, 'disableAccount']);
 
+                // Referral
+                Route::get('/r/{referralCode}',  [ReferralController::class, 'link']);
+                
                 // Change Password
                 Route::post('change-password', [ChangePasswordController::class, 'store']);
                 

@@ -29,7 +29,7 @@ class RequestController extends Controller
             return response()->json($this->invalidRequest());
         }
 
-    //    try {
+       try {
             $this->requestUser = RequestUser::select(
                 'reason',
                 'image',
@@ -39,14 +39,13 @@ class RequestController extends Controller
                 'created_at',
             )
             ->where('user_id', $this->user->id)
-            ->with('typeRequest')
+            ->with('TypeRequest')
             ->orderByDesc('created_at')
             ->get();
-
-        // } catch (\Throwable $th) {
-            // $statusCode = 1;
-            // $msg = 'Hubo un error';
-        // }
+        } catch (\Throwable $th) {
+            $statusCode = 1;
+            $msg = 'Hubo un error';
+        }
    
         return response()->json([
             'statusCode' => isset($statusCode) ? $statusCode : 0,
@@ -81,7 +80,7 @@ class RequestController extends Controller
             $this->requestUser->description     = $request->description;
             $this->requestUser->amount          = $request->amount;
             $this->requestUser->user_id         = $this->user->id;
-            $this->requestUser->status          = 'slope';
+            $this->requestUser->status          = 'pendiente';
             $this->requestUser->type_request_id = 1;
 
             if ($request->file('image')) {

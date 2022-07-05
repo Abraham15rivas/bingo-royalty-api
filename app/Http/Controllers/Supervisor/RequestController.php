@@ -42,7 +42,7 @@ class RequestController extends Controller
                 'amount',
                 'image'
             )
-            ->where('status', 'slope')
+            ->where('status', 'pendiente')
             ->get();
         } catch (\Exception $e) {
             return response()->json($this->serverError($e));
@@ -66,11 +66,11 @@ class RequestController extends Controller
                 'amount',
             )
             ->where('id', $id)
-            ->where('status', 'slope')
+            ->where('status', 'pendiente')
             ->first();
 
             if ($this->request) {
-                $this->request->status = 'passed';
+                $this->request->status = 'aprobado';
                 $this->request->save();
 
                 $request->offsetSet('balanceAcquired', $this->request->amount);
@@ -103,11 +103,11 @@ class RequestController extends Controller
                 'amount',
             )
             ->where('id', $id)
-            ->where('status', 'slope')
+            ->where('status', 'pendiente')
             ->first();
 
             if ($this->request) {
-                $this->request->status = 'refused';
+                $this->request->status = 'rechazado';
                 $this->request->save();
             }
 
