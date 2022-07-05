@@ -17,16 +17,24 @@ class CreateUsersTable extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            
             $table->boolean('vip')->default(false);
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->boolean('is_active')->default(true);
+            
             $table->rememberToken();
             $table->timestamps();
+            
+            $table->string('referral_code', 7)->unique();
+            $table->unsignedBigInteger('referred_by')->nullable();
+            $table->foreign('referred_by')->references('id')->on('users');
+
             $table->foreignId('role_id')
                 ->constrained()
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
+
             $table->softDeletes();
         });
     }

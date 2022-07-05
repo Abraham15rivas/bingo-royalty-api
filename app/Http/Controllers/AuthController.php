@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\{User, Profile};
+use App\Models\{
+    User, 
+    Profile,
+    Wallet
+};
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 use Illuminate\Foundation\Auth\ResetsPasswords;
@@ -18,10 +22,12 @@ class AuthController extends Controller
 {
     public function signup(Request $request)
     {
+        
         $rules =[
-            'name'     => 'required',
-            'email'    => 'required|string|unique:users',
-            'password' => 'min:6|confirmed',
+            'name'          => 'required',
+            'email'         => 'required|string|unique:users',
+            'password'      => 'min:6|confirmed',
+            'referral_code' => 'string',
         ];
 
         $customMessages = [
@@ -40,27 +46,52 @@ class AuthController extends Controller
                 'error' => $validator->messages()
             ]);
         } else {
-            $user = new User([
-                'name'     => $request->name,
-                'email'    => $request->email,
-                'password' => bcrypt($request->password),
-                'role_id'  => 3
-            ]);
+            try {
+                $user = new User([
+                    'name'     => $request->name,
+                    'email'    => $request->email,
+                    'password' => bcrypt($request->password),
+                    'referral_code' => User::getUniqueReferralCode(),
+                    'referred_by' => $this->getReferredBy($request->referral_code),
+                    'role_id'  => 3
+                ]);
+                
+                $user->save();
 
-            $user->save();
+                $profile = Profile::create([
+                    'user_id' => $user->id,
+                    'name'    => $request->name,
+                    'profile_image' => '/storage/profile/usuario.png'
+                ]);
 
-            $profile = Profile::create([
-                'user_id' => $user->id,
-                'name'    => $request->name,
-            ]);
-
-            $profile->save();
+                $profile->save();
+               
+                if ($user->role_id === 3) {
+                   
+                    $wallet = Wallet::create([
+                        'user_id' => $user->id,
+                        'name'    => 'Wallet de ' . $request->name,
+                        'balance' => 0.00,
+                    ]);
+                    $wallet->save();
+                }
+            } catch (\Exception $e) {
+                return response()->json($this->serverError($e));
+            }
             
             return response()->json([
                 'success' => true, 
                 'message' => 'Usuario creado correctamente!'
             ], 201);
         }
+    }
+
+    private function getReferredBy($referralCode)
+    {
+        if ($referralCode)
+            return User::where('referral_code', $referralCode)->value('id');
+
+        return null;
     }
 
     public function login(Request $request)
@@ -75,7 +106,22 @@ class AuthController extends Controller
         $credentials = $request->only(['email', 'password']);
 
         if (Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
+
             $user = User::find(Auth::user()->id);
+
+            if (!$user->is_active) {
+
+                $user = null;
+                $msg = 'Su cuenta se encuentra desactivada - bingo@support.com';
+                $statusCode = 1;
+
+                return response()->json([
+                    'statusCode' => $statusCode,
+                    'message' => $msg,
+                    'user' => $user 
+                ]);
+            }
+
             $msg = 'Usuario logeado con exito';
             $statusCode = 0;
         } else {
@@ -85,9 +131,6 @@ class AuthController extends Controller
         }
 
         if ($user) {
-            /*if ($user->role_id === 3) {
-                $this->revokeSessionToken($user->id);
-            }*/
             $tokenResult = $user->createToken('Token de usuario');
             $token = $tokenResult->token;
             $token->expires_at = Carbon::now()->addWeeks(1);
@@ -117,6 +160,8 @@ class AuthController extends Controller
     {
         try {
             $user = $request->user();
+            $user->profile;
+            $user->wallet;
         } catch (\Throwable $th) {
             $statusCode = 1;
             $msg = 'Hubo un error';

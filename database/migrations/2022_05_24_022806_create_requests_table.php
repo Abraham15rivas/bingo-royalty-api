@@ -19,7 +19,7 @@ class CreateRequestsTable extends Migration
             $table->string('image')->nullable();
             $table->text('description');
             $table->decimal('amount');
-            $table->enum('status', ['slope', 'passed', 'refused']);
+            $table->enum('status', ['pendiente', 'aprobado', 'rechazado']);
             $table->foreignId('user_id')
                 ->constrained()
                 ->onUpdate('cascade')

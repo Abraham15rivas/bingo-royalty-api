@@ -25,6 +25,11 @@ class Account extends Model
         'user_id'
     ];
 
+    protected $casts = [
+        'created_at' => 'datetime:Y-m-d',
+        'updated_at' => 'datetime:Y-m-d',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);

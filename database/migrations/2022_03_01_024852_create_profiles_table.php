@@ -20,6 +20,7 @@ class CreateProfilesTable extends Migration
             $table->string('nick_name')->nullable();
             $table->string('language')->nullable();
             $table->string('country')->nullable();
+            $table->boolean('notifications')->default(true);
             $table->string('profile_image')->nullable();
             $table->foreignId('user_id')
                 ->constrained()
