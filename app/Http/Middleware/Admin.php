@@ -21,7 +21,7 @@ class Admin
     {
         $userRole = $request->user()->role_id;
 
-        if ($userRole === 2) {
+        if (intval($userRole) === 2) {
             return $next($request);
         } else {
             return response()->json($this->notAllowed(), 401);
