@@ -21,7 +21,7 @@ class Supervisor
     {
         $userRole = $request->user()->role_id;
 
-        if ($userRole === 5) {
+        if (intval($userRole) === 5) {
             return $next($request);
         } else {
             return response()->json($this->notAllowed(), 401);
