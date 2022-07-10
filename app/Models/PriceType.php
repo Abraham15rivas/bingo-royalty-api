@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\{
     SoftDeletes
 };
 
-class Account extends Model
+class PriceType extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -19,19 +19,11 @@ class Account extends Model
      */
     protected $fillable = [
         'name',
-        'description',
-        'attributes',
-        'type_account',
-        'user_id'
+        'description'
     ];
 
-    protected $casts = [
-        'created_at' => 'datetime:Y-m-d',
-        'updated_at' => 'datetime:Y-m-d',
-    ];
-
-    public function user()
+    public function prices()
     {
-        return $this->belongsTo(User::class);
+        return $this->hasMany(Price::class);
     }
 }
