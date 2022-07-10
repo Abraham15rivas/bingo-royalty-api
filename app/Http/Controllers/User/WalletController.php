@@ -118,7 +118,8 @@ class WalletController extends Controller
                 $sender     = $this->user->wallet;
                 $balance    = $sender->balance;
 
-                if ($balance > 0 && $balance >= $request->balanceToSend) {
+                // Verificar condiciones
+                if ($balance > 0 && $balance >= $request->balanceToSend) { 
                     $receiver = User::with([
                             'wallet' => function ($query) {
                                 $query->select('id', 'user_id', 'balance');

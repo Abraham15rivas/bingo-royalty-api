@@ -15,7 +15,8 @@ use App\Traits\{
 use App\Models\{
     MatrixGroup,
     Matrix,
-    UserCardboard
+    UserCardboard,
+    Price
 };
 
 class CardboardController extends Controller
@@ -28,6 +29,7 @@ class CardboardController extends Controller
     protected $cardboard;
     protected $cardboards;
     protected $matrixGroup;
+    protected $price;
 
     protected $validatorRules = [];
 
@@ -226,8 +228,23 @@ class CardboardController extends Controller
         }
 
         if ($this->user->wallet->balance <= 0) {
-            $errors = $this->customValidator(class_basename($this), 'balanceToSend', 'fondos insuficientes.');
+            $errors = $this->customValidator(class_basename($this), 'balanceInWallet', 'fondos insuficientes.');
             return response()->json($this->validationFail($errors));
+        }
+
+        $this->price = Price::select(
+            'amount'
+        )
+        ->where('price_type_id', 1)
+        ->first();
+
+        if ($this->price) {
+            if ($this->user->wallet->balance < $this->price->amount) {
+                $errors = $this->customValidator(class_basename($this), 'balanceInWallet', 'fondos insuficientes.');
+                return response()->json($this->validationFail($errors));
+            }
+        } else {
+            return response()->json('Algo salio mal, Model Price');
         }
 
         try {
@@ -275,7 +292,11 @@ class CardboardController extends Controller
                                 'cardboards' => $listCardboards
                             ]);
 
-                            $this->assignCardboard();
+                            if ($this->assignCardboard() === 'done') {
+                                $this->user->wallet->update([
+                                    'balance' => ($this->user->wallet->balance - $this->price->amount)
+                                ]);
+                            }
                         }
                     }
                 }

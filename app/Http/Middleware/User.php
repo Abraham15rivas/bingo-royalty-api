@@ -21,7 +21,7 @@ class User
     {
         $userRole = $request->user()->role_id;
 
-        if ($userRole === 3) {
+        if (intval($userRole) === 3) {
             return $next($request);
         } else {
             return response()->json($this->notAllowed(), 401);
