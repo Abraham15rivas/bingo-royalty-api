@@ -35,7 +35,8 @@ class PriceController extends Controller
             $this->listPrice = Price::select(
                 'name',
                 'description',
-                'amount'    
+                'amount',
+                'price_type_id'
             )
             ->get();
         } catch (\Exception $e) {

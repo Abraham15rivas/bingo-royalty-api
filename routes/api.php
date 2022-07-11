@@ -52,7 +52,7 @@ Route::group([
         Route::get('/user', [AuthController::class, 'user']);
 
         // List Price
-        Route::get('/price', [PriceController::class, 'index']);
+        Route::get('/prices', [PriceController::class, 'index']);
         
         // Group route: Admin
         Route::group([
