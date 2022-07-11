@@ -1,7 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\{
+    AuthController,
+    PriceController
+};
 
 // Folder Admin
 use App\Http\Controllers\Admin\{
@@ -47,6 +50,9 @@ Route::group([
 
         // User
         Route::get('/user', [AuthController::class, 'user']);
+
+        // List Price
+        Route::get('/price', [PriceController::class, 'index']);
         
         // Group route: Admin
         Route::group([
