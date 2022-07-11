@@ -25,7 +25,8 @@ class User extends Authenticatable
         'password',
         'role_id',
         'referred_by', 
-        'referral_code'
+        'referral_code',
+        'status'
     ];
 
     /**
@@ -106,6 +107,11 @@ class User extends Authenticatable
     public function userCardboards()
     {
         return $this->hasMany(UserCardboard::class);
+    }
+    
+    public function meetings()
+    {
+        return $this->BelongsToMany(Meeting::class);
     }
 
     /**

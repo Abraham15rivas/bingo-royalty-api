@@ -34,6 +34,8 @@ class CreateUsersTable extends Migration
                 ->constrained()
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
+            
+            $table->enum('status', ['conectado', 'desconectado', 'jugando']);
 
             $table->softDeletes();
         });
