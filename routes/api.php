@@ -29,6 +29,11 @@ use App\Http\Controllers\User\{
     RequestController as RequestControllerUser
 };
 
+// Folder PlayAssistant
+use App\Http\Controllers\PlayAssistant\{
+    GameController
+};
+
 // Group route: v1.0 Bingo Royal
 Route::group([
     'prefix' => 'v1.0',
@@ -53,7 +58,7 @@ Route::group([
 
         // List Price
         Route::get('/prices', [PriceController::class, 'index']);
-        
+
         // Group route: Admin
         Route::group([
             'prefix' => 'admin',
@@ -141,7 +146,7 @@ Route::group([
             'prefix' => 'play-assistant',
             'middleware' => 'playAssistant',
         ], function () {
-            // code ...
+            Route::post('meeting', [GameController::class, 'createMeeting']);
         });
 
         // Group route: Supervisor
