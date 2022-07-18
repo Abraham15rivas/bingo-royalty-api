@@ -21,7 +21,7 @@ class CreateMeetingsTable extends Migration
             $table->bigInteger('cardboard_number');
             $table->decimal('line_play');
             $table->decimal('full_cardboard');
-            $table->enum('status', ['creada', 'en progreso', 'finalizada']);
+            $table->enum('status', ['creada', 'en progreso', 'finalizada'])->nullable();
             $table->json('numbers')->nullable();
             $table->timestamps();
             $table->softDeletes();

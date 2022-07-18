@@ -53,7 +53,7 @@ class AuthController extends Controller
                     'password' => bcrypt($request->password),
                     'referral_code' => User::getUniqueReferralCode(),
                     'referred_by' => $this->getReferredBy($request->referral_code),
-                    'role_id'  => 3
+                    'role_id'  => 3 
                 ]);
                 
                 $user->save();

@@ -23,8 +23,8 @@ class GameController extends Controller
         'cardboard_number'  => 'required|integer',
         'line_play'         => 'required|numeric|regex:/^[\d]{0,11}(\.[\d]{1,2})?$/', /* 0 to 11 digits and 2 optional decimals */
         'full_cardboard'    => 'required|numeric|regex:/^[\d]{0,11}(\.[\d]{1,2})?$/', /* 0 to 11 digits and 2 optional decimals */
-        'start'             =>  'required|datetime',
-        'end'               => 'required|datetime'
+        'start'             => 'required|date',
+        'end'               => 'required|date'
     ];
 
     public function __construct() {
