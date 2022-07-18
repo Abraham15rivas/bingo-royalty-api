@@ -22,66 +22,73 @@ class UserSeeder extends Seeder
         $users = collect();
         // SuperAdmin
         $users->push(User::create([
-            'name'      => 'MasterAdmin',
-            'email'     => 'masteradmin@test.com',
-            'password'  => Hash::make('secret123'),
+            'name'          => 'MasterAdmin',
+            'email'         => 'masteradmin@test.com',
+            'password'      => Hash::make('secret123'),
             'referral_code' => User::getUniqueReferralCode(),
-            'role_id'   => 1
+            'role_id'       => 1,
+            'status'        => 'desconectado'
         ]));
     
         // Admin 
         $users->push(User::create([
-            'name'      => 'Admin',
-            'email'     => 'admin@test.com',
-            'password'  => Hash::make('secret123'),
+            'name'          => 'Admin',
+            'email'         => 'admin@test.com',
+            'password'      => Hash::make('secret123'),
             'referral_code' => User::getUniqueReferralCode(),
-            'role_id'   => 2
+            'role_id'       => 2,
+            'status'        => 'desconectado'
         ]));
         
         // PlayAssistant
         $users->push(User::create([
-            'name'      => 'PlayAssistant',
-            'email'     => 'playassistant@test.com',
-            'password'  => Hash::make('secret123'),
+            'name'          => 'PlayAssistant',
+            'email'         => 'playassistant@test.com',
+            'password'      => Hash::make('secret123'),
             'referral_code' => User::getUniqueReferralCode(),
-            'role_id'   => 4
+            'role_id'       => 4,
+            'status'        => 'desconectado'
         ]));
         
         // Supervisor
         $users->push(User::create([
-            'name'      => 'Supervisor',
-            'email'     => 'supervisor@test.com',
-            'password'  => Hash::make('secret123'),
+            'name'          => 'Supervisor',
+            'email'         => 'supervisor@test.com',
+            'password'      => Hash::make('secret123'),
             'referral_code' => User::getUniqueReferralCode(),
-            'role_id'   => 5
+            'role_id'       => 5,
+            'status'        => 'desconectado'
         ]));
 
         // User
         $users->push(User::create([
-            'name'      => 'Diego',
-            'email'     => 'diego@test.com',
-            'password'  => Hash::make('secret123'),
+            'name'          => 'Diego',
+            'email'         => 'diego@test.com',
+            'password'      => Hash::make('secret123'),
             'referral_code' => User::getUniqueReferralCode(),
-            'role_id'   => 3
+            'role_id'       => 3,
+            'status'        => 'desconectado'
         ]));
         
         // User
         $users->push(User::create([
-            'name'      => 'Abraham',
-            'email'     => 'abraham@test.com',
-            'password'  => Hash::make('secret123'),
+            'name'          => 'Abraham',
+            'email'         => 'abraham@test.com',
+            'password'      => Hash::make('secret123'),
             'referral_code' => User::getUniqueReferralCode(),
-            'role_id'   => 3
+            'role_id'       => 3,
+            'status'        => 'desconectado'
         ]));
 
         // User
         $users->push(User::create([
-            'name'      => 'jose',
-            'email'     => 'jose@test.com',
-            'vip'       => true,
-            'password'  => Hash::make('secret123'),
+            'name'          => 'jose',
+            'email'         => 'jose@test.com',
+            'vip'           => true,
+            'password'      => Hash::make('secret123'),
             'referral_code' => User::getUniqueReferralCode(),
-            'role_id'   => 3
+            'role_id'       => 3,
+            'status'        => 'desconectado'
         ]));
 
         $this->createWalletForUsers($users);
@@ -103,9 +110,9 @@ class UserSeeder extends Seeder
     private function createProfilesForUsers($users) {
         foreach ($users as $user) {
             Profile::create([
-                'name' => $user->name,
-                'profile_image'   => '/storage/profile/user.png',
-                'user_id'   => $user->id
+                'name'              => $user->name,
+                'profile_image'     => '/storage/profile/user.png',
+                'user_id'           => $user->id
             ]);
         }
         return true;

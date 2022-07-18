@@ -139,14 +139,21 @@ Route::group([
             // Requests
             Route::get('requests', [RequestControllerUser::class, 'index']);
             Route::post('request', [RequestControllerUser::class, 'store']);
-        });
 
+            // Game
+            Route::post('meeting', [GameController::class, 'connectMeeting']);
+        });
+        
         // Group route: play-assistant
         Route::group([
             'prefix' => 'play-assistant',
             'middleware' => 'playAssistant',
         ], function () {
             Route::post('meeting', [GameController::class, 'createMeeting']);
+            Route::get('meeting', [GameController::class, 'index']);
+            Route::get('meeting/{id}', [GameController::class, 'show']);
+            Route::post('meeting/{id}/game', [GameController::class, 'throwNumber']);
+            Route::put('meeting/{id}/game', [GameController::class, 'initMeeting']);
         });
 
         // Group route: Supervisor

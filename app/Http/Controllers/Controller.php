@@ -10,4 +10,10 @@ use Illuminate\Routing\Controller as BaseController;
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+
+    protected $nodeUrl;
+
+    public function __construct() {
+        $this->nodeUrl = env('MIX_URL_LISTEN');
+    }
 }

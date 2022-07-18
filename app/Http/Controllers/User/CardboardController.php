@@ -30,6 +30,7 @@ class CardboardController extends Controller
     protected $cardboards;
     protected $matrixGroup;
     protected $price;
+    protected $matrices;
 
     protected $validatorRules = [];
 
@@ -74,6 +75,31 @@ class CardboardController extends Controller
             return $this->validationFail($validator->errors());
         }
 
+        if ($this->user->wallet->balance <= 0) {
+            $errors = $this->customValidator(class_basename($this), 'balanceInWallet', 'fondos insuficientes.');
+            return response()->json($this->validationFail($errors));
+        }
+
+        if (!$this->user->vip) {
+            $errors = $this->customValidator(class_basename($this), 'UserVip', 'No eres usuario vip, compra la membresía para poder adquirir cartones personalizados');
+            return response()->json($this->validationFail($errors));
+        }
+
+        $this->price = Price::select(
+            'amount'
+        )
+        ->where('price_type_id', 2)
+        ->first();
+
+        if ($this->price) {
+            if ($this->user->wallet->balance < $this->price->amount) {
+                $errors = $this->customValidator(class_basename($this), 'balanceInWallet', 'fondos insuficientes.');
+                return response()->json($this->validationFail($errors));
+            }
+        } else {
+            return response()->json('Algo salio mal, Model Price');
+        }
+
         try {
             $data = $this->matrixGenerator($request);
 
@@ -89,7 +115,7 @@ class CardboardController extends Controller
         return response()->json($this->success($result));
     }
 
-    private function cardboardGeneratorVip($data) {
+    private function cardboardValidatorVip($data) {
         // falta validar los cartones vip here, para saber si estan repetidos
         return $data;
     }
@@ -99,7 +125,7 @@ class CardboardController extends Controller
         $matrix         = collect();
 
         for ($i = 0; $i < count($request->matrices); $i++) {
-            $this->cardboard = $this->cardboardGeneratorVip($request->matrices[$i]);
+            $this->cardboard = $this->cardboardValidatorVip($request->matrices[$i]);
 
             if ($this->cardboard === true) {
                 return 'Duplicate cardboard, change combination';
@@ -160,7 +186,7 @@ class CardboardController extends Controller
 
         try {
             UserCardboard::create([
-                'status'    => 'inGame',
+                'status'    => 'available',
                 'serial'    => $this->serial,
                 'user_id'   => $this->user->id,
                 'cardboard' => json_encode($this->cardboard)
@@ -254,57 +280,100 @@ class CardboardController extends Controller
                 'matrix_groups.expiration_date as expirationDate',
                 DB::raw("extract(day from (matrix_groups.expiration_date::timestamp - CURRENT_DATE::timestamp))::int as dayElapsed"),
                 'matrices.cardboards',
-                'matrices.id as matrix_id'
+                'matrices.id as matrix_id',
+                'matrices.locked'
             )
             ->join('matrices', 'matrices.matrix_group_id', 'matrix_groups.id')
             ->where('matrix_groups.vip', false)
             ->where('matrix_groups.expiration_date', '>', Carbon::now())
             ->first();
 
+            if ($this->matrixGroup->locked) {
+                return response()->json([
+                    'statusCode'    => 20,
+                    'message'       => 'Se están procesando otras compras, por favor espere y reintente su compra, existe la posibilidad de que el cartón que intentas comprar ya se haya vendido :)'
+                ]);
+            }
+
             $listCardboards = [];
 
             if (isset($this->matrixGroup->cardboards)) {
+                $this->matrices = Matrix::select(
+                        'id',
+                        'locked',
+                        'cardboards'
+                    )
+                    ->find($this->matrixGroup->matrix_id);
+
+                // Bloquear matrix
+                $this->matrices->locked = true;
+                $this->matrices->save();
+
                 $cardboardResponse = $this->getListCardboard($this->matrixGroup->cardboards);
 
                 if ($cardboardResponse->statusCode === 0) {
                     $listCardboards = $cardboardResponse
                         ->cardboardObject;
 
-                    $this->serial = $this->generateSeries();
+                    $cardboard = $listCardboards
+                        ->where('id', $request->id)
+                        ->first();
 
-                    foreach ($listCardboards as $matrixCardboard) {
-                        if ($matrixCardboard->id === $request->id) {
-                            $matrixCardboard->serial = $this->serial;
-                            $this->cardboard = $matrixCardboard->cardboard;
-                            break;
-                        }
-                    }
+                    if (empty($cardboard)) {
+                        $this->cardboard = 'Cartón no existe';
 
-                    if (isset($this->matrixGroup->matrix_id)) {
-                        $matrix = Matrix::select(
-                                'id',
-                                'cardboards'
-                            )
-                            ->find($this->matrixGroup->matrix_id);
+                        // Desbloquear matrix
+                        $this->matrices->locked = false;
+                        $this->matrices->save();
+                    } else {
+                        if (isset($cardboard->serial) && $cardboard->serial !== '') {
+                            $this->cardboard = 'Cartón Comprado';
 
-                        if (!empty($matrix)) {
-                            $matrix->update([
-                                'cardboards' => $listCardboards
-                            ]);
-
-                            if ($this->assignCardboard() === 'done') {
-                                $this->user->wallet->update([
-                                    'balance' => ($this->user->wallet->balance - $this->price->amount)
+                            // Desbloquear matrix
+                            $this->matrices->locked = false;
+                            $this->matrices->save();
+                        } else {
+                            $listCardboardAvailables = $listCardboards
+                                ->where('serial', "")
+                                ->values();
+    
+                            $this->serial = $this->generateSeries();
+    
+                            foreach ($listCardboardAvailables as $matrixCardboard) {
+                                if ($matrixCardboard->id === $request->id) {
+                                    $matrixCardboard->serial = $this->serial;
+                                    $this->cardboard = $matrixCardboard->cardboard;
+                                    break;
+                                }
+                            }
+        
+                            if (!empty($this->matrices)) {
+                                $this->matrices->update([
+                                    'cardboards' => $listCardboardAvailables
                                 ]);
+    
+                                if ($this->assignCardboard() === 'done') {
+                                    $this->user->wallet->update([
+                                        'balance' => ($this->user->wallet->balance - $this->price->amount)
+                                    ]);
+    
+                                    // Desbloquear matrix
+                                    $this->matrices->locked = false;
+                                    $this->matrices->save();
+                                }
                             }
                         }
                     }
+
                 }
             }
         } catch (\Exception $e) {
+            // Desbloquear matrix
+            $this->matrices->locked = false;
+            $this->matrices->save();
             return response()->json($this->serverError($e));
         }
 
-        return response()->json($this->success([]));
+        return response()->json($this->success($this->cardboard, 'cardboard'));
     }
 }

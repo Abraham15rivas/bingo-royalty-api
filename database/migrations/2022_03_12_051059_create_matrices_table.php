@@ -16,6 +16,7 @@ class CreateMatricesTable extends Migration
         Schema::create('matrices', function (Blueprint $table) {
             $table->id();
             $table->json('cardboards');
+            $table->boolean('locked')->default(false);
             $table->foreignId('matrix_group_id')
                 ->constrained()
                 ->onUpdate('cascade')
