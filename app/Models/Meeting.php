@@ -24,13 +24,16 @@ class Meeting extends Model
         'line_play',
         'full_cardboard',
         'start',
-        'end',
         'status',
-        'numbers'
+        'numbers',
+        'total_collected',
+        'accumulated',
+        'commission',
+        'reearnings_before_39'
     ];
 
     public function users()
     {
-        return $this->BelongsToMany(User::class);
+        return $this->BelongsToMany(User::class)->withTimestamps();
     }
 }
