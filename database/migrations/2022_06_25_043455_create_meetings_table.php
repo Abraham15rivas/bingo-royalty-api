@@ -17,8 +17,11 @@ class CreateMeetingsTable extends Migration
             $table->id();
             $table->string('name');
             $table->timestamp('start')->nullable();
-            $table->timestamp('end')->nullable();
             $table->bigInteger('cardboard_number');
+            $table->bigInteger('total_collected');
+            $table->bigInteger('accumulated');
+            $table->bigInteger('commission');
+            $table->bigInteger('reearnings_before_39');
             $table->decimal('line_play');
             $table->decimal('full_cardboard');
             $table->enum('status', ['creada', 'en progreso', 'finalizada'])->nullable();
