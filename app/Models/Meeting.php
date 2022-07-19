@@ -29,7 +29,9 @@ class Meeting extends Model
         'total_collected',
         'accumulated',
         'commission',
-        'reearnings_before_39'
+        'referred',
+        'reearnings_before_39',
+        'reearnings_after_39'
     ];
 
     public function users()

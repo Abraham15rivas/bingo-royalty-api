@@ -120,6 +120,8 @@ class GameController extends Controller
             $this->meeting->accumulated             = $request->accumulated;
             $this->meeting->commission              = $request->commission;
             $this->meeting->reearnings_before_39    = $request->reearnings_before_39;
+            $this->meeting->reearnings_after_39     = $request->reearnings_after_39;
+            $this->meeting->referred                = $request->referred;
             $this->meeting->save();
 
             DB::commit();
