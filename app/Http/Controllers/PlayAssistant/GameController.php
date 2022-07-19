@@ -31,10 +31,11 @@ class GameController extends Controller
         'line_play'             => 'required|numeric|regex:/^[\d]{0,11}(\.[\d]{1,2})?$/', /* 0 to 11 digits and 2 optional decimals */
         'full_cardboard'        => 'required|numeric|regex:/^[\d]{0,11}(\.[\d]{1,2})?$/', /* 0 to 11 digits and 2 optional decimals */
         'start'                 => 'required|date',
-        'total_collected'       => 'required|integer',
-        'accumulated'           => 'required|integer',
-        'commission'            => 'required|integer',
-        'reearnings_before_39'  => 'required|integer'
+        'total_collected'       => 'nullable|integer',
+        'accumulated'           => 'nullable|integer',
+        'commission'            => 'nullable|integer',
+        'reearnings_before_39'  => 'required|integer',
+        'reearnings_after_39'   => 'required|integer'
     ];
 
     public function __construct() {
