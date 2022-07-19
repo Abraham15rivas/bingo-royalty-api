@@ -140,7 +140,7 @@ class AuthController extends Controller
         return response()->json([
             'statusCode' => $statusCode,
             'message' => $msg,
-            'user' => $user ? ['change_the_first_password' => $user->change_the_first_password] : null,
+            'user' => $user ? $user : null,
             'accessToken' => $user ? $tokenResult->accessToken : null,
             'tokenType'   => $user ? 'Bearer' : null,
             'expiresAt'   => $user ? Carbon::parse($tokenResult->token->expires_at)->toDateTimeString() : null
