@@ -80,7 +80,22 @@ class GameController extends Controller
         DB::beginTransaction();
 
         try {
-            $this->meeting = Meeting::find($id);
+            $this->meeting = Meeting::select(
+                    'id',
+                    'name',
+                    'start',
+                    'cardboard_number',
+                    'total_collected',
+                    'accumulated',
+                    'commission',
+                    'reearnings_before_39',
+                    'line_play',
+                    'full_cardboard',
+                    'status',
+                    'numbers'
+                )
+                ->withCount('users')
+                ->find($id);
 
             if (!$this->meeting) {
                 $this->meeting['statusCode']  = 0;
@@ -166,7 +181,7 @@ class GameController extends Controller
             return response()->json($this->invalidRequest());
         }
 
-        $validatorRules['lyrics'] = 'required|string';
+        $validatorRules['lyrics'] = 'required|string|max:1';
         $validatorRules['number'] = 'required|integer';
 
         $validator = $this->validator($request->all(), $validatorRules, class_basename($this));
@@ -180,6 +195,8 @@ class GameController extends Controller
         DB::beginTransaction();
 
         try {
+            $request->lyrics = strtoupper($request->lyrics);
+
             if ($request->number < $this->rules['minNumber'] || $request->number > $this->rules['maxNumber']) {
                 $response->statusCode   = 2;
                 $response->message      = 'Numero fuera de rango';
