@@ -58,11 +58,6 @@ class GameController extends Controller
         try {
             $this->meetings = Meeting::get();
 
-            if (!$this->meeting) {
-                $this->meeting['statusCode']  = 0;
-                $this->meeting['message']     = 'No hay salas creadas';
-            }
-
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -98,8 +93,7 @@ class GameController extends Controller
                 ->find($id);
 
             if (!$this->meeting) {
-                $this->meeting['statusCode']  = 0;
-                $this->meeting['message']     = 'No existe la sala';
+                $this->meeting = 'No existe la sala';
             }
 
             DB::commit();
@@ -164,8 +158,7 @@ class GameController extends Controller
                 if ($this->meeting) {
                     $this->meeting->update(['status' => 'en progreso']); 
                 } else {
-                    $this->meeting['statusCode']  = 0;
-                    $this->meeting['message']     = 'No hay salas creadas';
+                    $this->meeting = 'No hay salas creadas';
                 }
             DB::commit();
         } catch (\Exception $e) {
@@ -182,7 +175,7 @@ class GameController extends Controller
         }
 
         $validatorRules['lyrics'] = 'required|string|max:1';
-        $validatorRules['number'] = 'required|integer';
+        $validatorRules['number'] = 'required|integer:max:2';
 
         $validator = $this->validator($request->all(), $validatorRules, class_basename($this));
 
@@ -195,18 +188,19 @@ class GameController extends Controller
         DB::beginTransaction();
 
         try {
-            $request->lyrics = strtoupper($request->lyrics);
+            $lyrics = strtoupper($request->lyrics);
+            $number = $request->number;
 
-            if ($request->number < $this->rules['minNumber'] || $request->number > $this->rules['maxNumber']) {
+            if ($number < $this->rules['minNumber'] || $number > $this->rules['maxNumber']) {
                 $errors = $this->customValidator(class_basename($this), 'Numero fuera de rango', 'Permitidos, desde: ' . $this->rules['minNumber'] . ' hasta: ' . $this->rules['maxNumber']);
                 return response()->json($this->validationFail($errors));
             } else {
-                if (isset($this->rules['letters'][$request->lyrics])) {
-                    $minLyrics = $this->rules['letters'][$request->lyrics][0];
-                    $maxLyrics = $this->rules['letters'][$request->lyrics][1];
+                if (isset($this->rules['letters'][$lyrics])) {
+                    $minLyrics = $this->rules['letters'][$lyrics][0];
+                    $maxLyrics = $this->rules['letters'][$lyrics][1];
 
-                    if ($request->number < $minLyrics || $request->number > $maxLyrics) {
-                        $errors = $this->customValidator(class_basename($this), 'Numero fuera de rango', 'Permitidos para ' . $request->lyrics . ' , desde: ' . $minLyrics . ' hasta: ' . $maxLyrics);
+                    if ($number < $minLyrics || $number > $maxLyrics) {
+                        $errors = $this->customValidator(class_basename($this), 'Numero fuera de rango', 'Permitidos para ' . $lyrics . ' , desde: ' . $minLyrics . ' hasta: ' . $maxLyrics);
                         return response()->json($this->validationFail($errors));
                     }
                 } else {
@@ -225,29 +219,34 @@ class GameController extends Controller
 
                     if ($existingNumbers) {
                         foreach ($existingNumbers as $item) {
-                            if ($item->lyrics === $request->lyrics) {
-                                if ($item->number === $request->number) {
+                            if ($item->lyrics === $lyrics) {
+                                if ($item->number === $number) {
                                     $errors = $this->customValidator(class_basename($this),'Número repetido', 'por favor reintentar');
-                                    return response()->json($this->validationFail($errors));
+                                    break;
                                 }
                             }
                         }
                     }
 
-                    if (!isset($response->statusCode)) {
-                        $receivedNumber = $request->all();
+                    if(isset($errors)) {
+                        return response()->json($this->validationFail($errors));
+                    }
 
-                        if ($existingNumbers) {
-                            array_push($existingNumbers, $receivedNumber);
-                            $numbers = collect($existingNumbers)->toJson();
-                        }
+                    $receivedNumber = collect([
+                        'lyrics' => $lyrics,
+                        'number' => $number
+                    ]);
 
-                        $this->meeting->numbers = isset($numbers) ? $numbers : [$receivedNumber];
+                    if ($existingNumbers) {
+                        array_push($existingNumbers, $receivedNumber);
+                        $numbers = collect($existingNumbers)->toJson();
+                    }
 
-                        if ($this->meeting->save()) {
-                            $this->issueNumber($this->meeting->numbers);
-                            $response = 'Número ingresado correctamente';
-                        }
+                    $this->meeting->numbers = isset($numbers) ? $numbers : [$receivedNumber];
+
+                    if ($this->meeting->save()) {
+                        $this->issueNumber($this->meeting->numbers);
+                        $response = 'Número ingresado correctamente';
                     }
                 } else {
                     $errors = $this->customValidator(class_basename($this),'No hay salas creadas', 'por favor reintentar');
@@ -268,8 +267,6 @@ class GameController extends Controller
         if (!$request->ajax()) {
             return response()->json($this->invalidRequest());
         }
-
-        $response = (object) [];
 
         DB::beginTransaction();
 
@@ -311,20 +308,17 @@ class GameController extends Controller
                         }
 
                         $this->meeting->users()->attach($this->user->id);
-
-                        $response->statusCode  = 0;
-                        $response->message     = 'Ingresado correctamente en la sala'; 
                     } else {
-                        $response->statusCode  = 2;
-                        $response->message     = 'El usuario no poseé cartones disponibles para ingresar a la sala, compra para poder participar en esta ronda'; 
+                        $errors = $this->customValidator(class_basename($this), 'El usuario no poseé cartones disponibles para ingresar a la sala', 'compra para poder participar en esta ronda');
+                        return response()->json($this->validationFail($errors));
                     }
                 } else {
-                    $response->statusCode  = 3;
-                    $response->message     = 'El usuario esta ' . $this->user->status . ' actualmente';
+                    $errors = $this->customValidator(class_basename($this), 'Estatus', 'El usuario esta ' . $this->user->status . ' actualmente');
+                    return response()->json($this->validationFail($errors));
                 }
             } else {
-                $response->statusCode  = 4;
-                $response->message     = 'No hay salas disponibles';
+                $errors = $this->customValidator(class_basename($this), 'Disponibilidad', 'No hay salas disponibles');
+                return response()->json($this->validationFail($errors));
             }
 
             DB::commit();
@@ -333,6 +327,6 @@ class GameController extends Controller
             return response()->json($this->serverError($e));
         }
 
-        return response()->json($this->success($response));
+        return response()->json($this->success([]));
     }
 }
