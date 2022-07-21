@@ -56,7 +56,22 @@ class GameController extends Controller
         DB::beginTransaction();
 
         try {
-            $this->meetings = Meeting::get();
+            $this->meetings = Meeting::select(
+                    'id',
+                    'name',
+                    'start',
+                    'cardboard_number',
+                    'total_collected',
+                    'accumulated',
+                    'commission',
+                    'reearnings_before_39',
+                    'line_play',
+                    'full_cardboard',
+                    'status',
+                    'numbers'
+                )
+                ->orderBy('start')
+                ->get();
 
             DB::commit();
         } catch (\Exception $e) {
