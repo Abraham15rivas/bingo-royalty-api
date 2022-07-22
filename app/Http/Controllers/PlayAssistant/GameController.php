@@ -16,6 +16,8 @@ use App\Models\{
     Meeting,
     User
 };
+use phpDocumentor\Reflection\Types\This;
+
 class GameController extends Controller
 {
     use ResponseTrait, ValidatorTrait;
@@ -24,6 +26,7 @@ class GameController extends Controller
     protected $user;
     protected $meeting;
     protected $meetings;
+    protected $cardboard;
 
     protected $validatorRules = [
         'name'                  => 'required|string',
@@ -369,5 +372,40 @@ class GameController extends Controller
         }
 
         return response()->json($this->success($this->meeting, 'meeting'));
+    }
+
+    public function cardboardInPlay(Request $request) {
+        if (!$request->ajax()) {
+            return response()->json($this->invalidRequest());
+        }
+
+        try {
+            $user = User::select(
+                    'id',
+                    'email',
+                    'status'
+                )
+                ->with(['userCardboards' => function($query) {
+                $query->select(
+                    'id',
+                    'status',
+                    'serial',
+                    'user_id',
+                    'cardboard'
+                )
+                ->where('status', 'inGame')
+                ->orderByDesc('created_at')
+                ->get();
+            }])
+            ->find($this->user->id);
+
+            if (isset($user->userCardboards)) {
+                $this->cardboard = $user->userCardboards;
+            }
+        } catch (\Exception $e) {
+            return response()->json($this->serverError($e));
+        }
+
+        return response()->json($this->success($this->cardboard, 'cardboard'));
     }
 }
