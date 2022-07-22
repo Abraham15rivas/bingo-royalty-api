@@ -53,8 +53,6 @@ class GameController extends Controller
             return response()->json($this->invalidRequest());
         }
 
-        DB::beginTransaction();
-
         try {
             $this->meetings = Meeting::select(
                     'id',
@@ -72,10 +70,7 @@ class GameController extends Controller
                 )
                 ->orderBy('start')
                 ->get();
-
-            DB::commit();
         } catch (\Exception $e) {
-            DB::rollBack();
             return response()->json($this->serverError($e));
         }
 
@@ -343,5 +338,36 @@ class GameController extends Controller
         }
 
         return response()->json($this->success([]));
+    }
+
+    public function nextPlay(Request $request) {
+        if (!$request->ajax()) {
+            return response()->json($this->invalidRequest());
+        }
+
+        try {
+            $this->meeting = Meeting::select(
+                    'id',
+                    'name',
+                    'start',
+                    'cardboard_number',
+                    'total_collected',
+                    'accumulated',
+                    'commission',
+                    'reearnings_before_39',
+                    'line_play',
+                    'full_cardboard',
+                    'status',
+                    'numbers'
+                )
+                ->where('status', '!=', 'finalizada')
+                ->where('status', '!=', 'en progreso')
+                ->orderBy('start')
+                ->first();
+        } catch (\Exception $e) {
+            return response()->json($this->serverError($e));
+        }
+
+        return response()->json($this->success($this->meeting, 'meeting'));
     }
 }
