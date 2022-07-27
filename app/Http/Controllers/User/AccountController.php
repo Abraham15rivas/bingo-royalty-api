@@ -132,7 +132,6 @@ class AccountController extends Controller
             return response()->json($this->invalidRequest());
         }
 
-
         $this->validatorRules = [
             'name'        => 'string|required',
             'description' => 'string|nullable',

@@ -137,6 +137,9 @@ class AuthController extends Controller
             $token->save();
         }
 
+        $user->profile;
+        $user->wallet;
+
         return response()->json([
             'statusCode' => $statusCode,
             'message' => $msg,
@@ -163,8 +166,6 @@ class AuthController extends Controller
     {
         try {
             $user = $request->user();
-            $user->profile;
-            $user->wallet;
         } catch (\Throwable $th) {
             $statusCode = 1;
             $msg = 'Hubo un error';
@@ -173,7 +174,7 @@ class AuthController extends Controller
         return response()->json([
             'statusCode' => isset($statusCode) ? $statusCode : 0,
             'message' => isset($msg) ? $msg : 'Success',
-            'user' => $user ? $user : null
+            'imgProfile' => $user->profile->profile_image ? $user->profile->profile_image : null
         ]);
     }
 
