@@ -142,6 +142,8 @@ Route::group([
 
             // Game
             Route::post('meeting', [GameController::class, 'connectMeeting']);
+            Route::get('meeting', [GameController::class, 'nextPlay']);
+            Route::get('game', [GameController::class, 'cardboardInPlay']);
         });
         
         // Group route: play-assistant
