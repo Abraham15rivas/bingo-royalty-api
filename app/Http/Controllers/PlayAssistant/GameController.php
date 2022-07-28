@@ -130,7 +130,7 @@ class GameController extends Controller
         }
 
         DB::beginTransaction();
-
+        
         try {
             $this->meeting = new Meeting();
             $this->meeting->name                    = $request->name;

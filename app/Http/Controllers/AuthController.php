@@ -53,7 +53,7 @@ class AuthController extends Controller
                     'password' => bcrypt($request->password),
                     'referral_code' => User::getUniqueReferralCode(),
                     'referred_by' => $this->getReferredBy($request->referral_code),
-                    'role_id'  => 3
+                    'role_id'  => 3 
                 ]);
                 
                 $user->save();
@@ -140,7 +140,7 @@ class AuthController extends Controller
         return response()->json([
             'statusCode' => $statusCode,
             'message' => $msg,
-            'user' => $user ? ['change_the_first_password' => $user->change_the_first_password] : null,
+            'user' => $user ? $user : null,
             'accessToken' => $user ? $tokenResult->accessToken : null,
             'tokenType'   => $user ? 'Bearer' : null,
             'expiresAt'   => $user ? Carbon::parse($tokenResult->token->expires_at)->toDateTimeString() : null

@@ -51,13 +51,10 @@ class UserProfileController extends Controller
     { 
         if (!$request->ajax()) {
             return response()->json($this->invalidRequest());
-        }  
+        }
 
         $validatedData = $request->validate([
             'name' => 'required',
-            'last_name' => 'required',
-            'nick_name' => 'required',
-            'country' => 'required',
             'profile_image' => 'mimes:jpg,jpeg,png|max:2048|nullable'
         ]);
 
