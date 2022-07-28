@@ -225,6 +225,7 @@ class GameController extends Controller
                         'id',
                         'numbers'
                     )
+                    ->where('status', 'en progreso')
                     ->find($id);
 
                 if ($this->meeting) {
