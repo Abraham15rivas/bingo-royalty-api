@@ -137,8 +137,8 @@ class AuthController extends Controller
             $token->save();
         }
 
-        $user->profile;
-        $user->wallet;
+        $user->profile; 
+        $user->wallet; 
 
         return response()->json([
             'statusCode' => $statusCode,
