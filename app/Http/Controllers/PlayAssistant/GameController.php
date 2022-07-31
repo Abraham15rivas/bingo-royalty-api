@@ -381,7 +381,7 @@ class GameController extends Controller
             return response()->json($this->serverError($e));
         }
 
-        return response()->json($this->success($this->meeting->first(), 'meeting'));
+        return response()->json($this->success($this->meeting->get(), 'meeting'));
     }
 
     public function cardboardInPlay(Request $request) {
