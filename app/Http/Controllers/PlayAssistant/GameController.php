@@ -365,14 +365,23 @@ class GameController extends Controller
                     'numbers'
                 )
                 ->where('status', '!=', 'finalizada')
-                ->where('status', '!=', 'en progreso')
-                ->orderBy('start')
-                ->first();
+                ->orderBy('start');
+
+            if ($request->has('from') && $request->has('to') && $request->has('timeZone')) {
+                $timeZone   = $request->timeZone;
+                $from       = $request->from;
+                $to         = $request->to;
+
+                $this->meeting->whereBetween(
+                    DB::raw("start AT TIME ZONE 'UTC' AT TIME ZONE '$timeZone'"), [ $from, $to ]
+                );
+            }
+
         } catch (\Exception $e) {
             return response()->json($this->serverError($e));
         }
 
-        return response()->json($this->success($this->meeting, 'meeting'));
+        return response()->json($this->success($this->meeting->first(), 'meeting'));
     }
 
     public function cardboardInPlay(Request $request) {
