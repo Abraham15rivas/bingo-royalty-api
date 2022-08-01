@@ -348,11 +348,11 @@ class GameController extends Controller
                         return response()->json($this->validationFail($errors));
                     }
                 } else {
-                    $errors = $this->customValidator(class_basename($this), 'Disponibilidad', 'No hay salas disponibles');
+                    $errors = $this->customValidator(class_basename($this), 'Fuera de limite', "supera los limites de cartones permitidos para esta jugada, puede seleccionar hasta: $limit catones");
                     return response()->json($this->validationFail($errors));
                 }
             } else {
-                $errors = $this->customValidator(class_basename($this), 'Fuera de limite', "supera los limites de cartones permitidos para esta jugada, puede seleccionar hasta: $limit catones");
+                $errors = $this->customValidator(class_basename($this), 'Disponibilidad', 'No hay salas disponibles');
                 return response()->json($this->validationFail($errors));
             }
 
