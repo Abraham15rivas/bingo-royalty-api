@@ -154,7 +154,7 @@ class GameController extends Controller
             return response()->json($this->serverError($e));
         }
 
-        return response()->json($this->success($this->meeting, 'meeting'));
+        return response()->json($this->success([]));
     }
 
     public function initMeeting(Request $request, $id) {
@@ -296,7 +296,7 @@ class GameController extends Controller
         try {
             $this->meeting = Meeting::where('status', 'en progreso')
                 ->first();
-
+            return $this->meeting;
             $limit                  = $this->meeting->cardboard_number ?? 1;
             $cardboardIdsSelected   = $request->cardboardIdsSelected;
 
@@ -313,7 +313,7 @@ class GameController extends Controller
                             ->orderByDesc('created_at')
                             ->where('status', 'available');
 
-                            if ($cardboardIdsSelected > 1) {
+                            if (count($cardboardIdsSelected) > 1) {
                                 $query->whereBetween('id', $cardboardIdsSelected);
                             } else {
                                 $query->where('id', $cardboardIdsSelected);
