@@ -27,6 +27,7 @@ class GameController extends Controller
     protected $meeting;
     protected $meetings;
     protected $cardboard;
+    protected $cardboardIdsSelected;
 
     protected $validatorRules = [
         'name'                  => 'required|string',
@@ -179,7 +180,7 @@ class GameController extends Controller
             return response()->json($this->serverError($e));
         }
 
-        return response()->json($this->success($this->meeting, 'meeting'));
+        return response()->json($this->success([]));
     }
 
     public function throwNumber(Request $request, $id) {
@@ -282,56 +283,73 @@ class GameController extends Controller
             return response()->json($this->invalidRequest());
         }
 
+        $validatorRules['cardboardIdsSelected'] = 'required|array';
+
+        $validator = $this->validator($request->all(), $validatorRules, class_basename($this));
+
+        if ($validator->fails()) {
+            return $this->validationFail($validator->errors());
+        }
+
         DB::beginTransaction();
 
         try {
             $this->meeting = Meeting::where('status', 'en progreso')
                 ->first();
 
+            $limit                  = $this->meeting->cardboard_number ?? 1;
+            $cardboardIdsSelected   = $request->cardboardIdsSelected;
+
+            return $cardboardIdsSelected;
+
             if ($this->meeting) {
-                $limit = $this->meeting->cardboard_number ?? 1;
+                if ($limit === count($cardboardIdsSelected)) {
+                    $user = User::with(['userCardboards' => function($query) use ($cardboardIdsSelected) {
+                            $query->select(
+                                'id',
+                                'status',
+                                'serial',
+                                'user_id',
+                                'cardboard'
+                            )
+                            ->orderByDesc('created_at')
+                            ->where('status', 'available')
+                            ->whereBetween('id', $cardboardIdsSelected);
+                        }])
+                        ->where('status', 'conectado')
+                        ->find($this->user->id);
 
-                $user = User::with(['userCardboards' => function($query) use ($limit) {
-                        $query->select(
-                            'id',
-                            'status',
-                            'serial',
-                            'user_id',
-                            'cardboard'
-                        )
-                        ->orderByDesc('created_at')
-                        ->limit($limit);
-                    }])
-                    ->where('status', 'conectado')
-                    ->find($this->user->id);
+                    if (!empty($user)) {
+                        $cardboardsAvailables = $user
+                            ->userCardboards
+                            ->where('status', 'available')
+                            ->values();
 
-                if (!empty($user)) {
-                    $cardboardsAvailables = $user
-                        ->userCardboards
-                        ->where('status', 'available')
-                        ->values();
+                        if (!empty($cardboardsAvailables)) {
+                            $user->update([
+                                'status' => 'jugando'
+                            ]);
 
-                    if (!empty($cardboardsAvailables)) {
-                        $user->update([
-                            'status' => 'jugando'
-                        ]);
+                            foreach ($cardboardsAvailables as $cardboard) {
+                                $cardboard->status = 'inGame';
+                                $cardboard->save();
+                            }
 
-                        foreach ($cardboardsAvailables as $cardboard) {
-                            $cardboard->status = 'inGame';
-                            $cardboard->save();
+                            $this->meeting->users()->attach($this->user->id);
+                        } else {
+                            $errors = $this->customValidator(class_basename($this), 'El usuario no poseé cartones disponibles para ingresar a la sala', 'compra para poder participar en esta ronda');
+                            return response()->json($this->validationFail($errors));
                         }
-
-                        $this->meeting->users()->attach($this->user->id);
                     } else {
-                        $errors = $this->customValidator(class_basename($this), 'El usuario no poseé cartones disponibles para ingresar a la sala', 'compra para poder participar en esta ronda');
+                        $errors = $this->customValidator(class_basename($this), 'Estatus', 'El usuario esta ' . $this->user->status . ' actualmente o los cartones seleccionados no estan disponibles');
                         return response()->json($this->validationFail($errors));
                     }
                 } else {
-                    $errors = $this->customValidator(class_basename($this), 'Estatus', 'El usuario esta ' . $this->user->status . ' actualmente');
+                    $errors = $this->customValidator(class_basename($this), 'Disponibilidad', 'No hay salas disponibles');
                     return response()->json($this->validationFail($errors));
                 }
             } else {
-                $errors = $this->customValidator(class_basename($this), 'Disponibilidad', 'No hay salas disponibles');
+                $errors = $this->customValidator(class_basename($this), 'Fuera de limite', "supera los limites de cartones permitidos para esta jugada, puede seleccionar hasta: $limit catones");
                 return response()->json($this->validationFail($errors));
             }
 
