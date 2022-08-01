@@ -311,8 +311,13 @@ class GameController extends Controller
                                 'cardboard'
                             )
                             ->orderByDesc('created_at')
-                            ->where('status', 'available')
-                            ->whereBetween('id', $cardboardIdsSelected);
+                            ->where('status', 'available');
+
+                            if ($cardboardIdsSelected > 1) {
+                                $query->whereBetween('id', $cardboardIdsSelected);
+                            } else {
+                                $query->where('id', $cardboardIdsSelected);
+                            }
                         }])
                         ->where('status', 'conectado')
                         ->find($this->user->id);
