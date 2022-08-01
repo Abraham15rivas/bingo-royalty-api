@@ -300,10 +300,8 @@ class GameController extends Controller
             $limit                  = $this->meeting->cardboard_number ?? 1;
             $cardboardIdsSelected   = $request->cardboardIdsSelected;
 
-            return $cardboardIdsSelected;
-
             if ($this->meeting) {
-                if ($limit === count($cardboardIdsSelected)) {
+                if (count($cardboardIdsSelected) > 0 && count($cardboardIdsSelected) <= $limit) {
                     $user = User::with(['userCardboards' => function($query) use ($cardboardIdsSelected) {
                             $query->select(
                                 'id',
