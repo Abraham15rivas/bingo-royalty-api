@@ -21,7 +21,7 @@ class PlayAssistant
     {
         $userRole = $request->user()->role_id;
 
-        if (intval($userRole)=== 4) {
+        if (intval($userRole) === 1 || intval($userRole) === 2 || intval($userRole) === 4 || intval($userRole) === 5) {
             return $next($request);
         } else {
             return response()->json($this->notAllowed(), 401);
