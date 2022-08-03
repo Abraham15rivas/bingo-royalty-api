@@ -16,7 +16,6 @@ use App\Models\{
     Meeting,
     User
 };
-use phpDocumentor\Reflection\Types\This;
 
 class GameController extends Controller
 {
@@ -296,7 +295,7 @@ class GameController extends Controller
         try {
             $this->meeting = Meeting::where('status', 'en progreso')
                 ->first();
-                
+            return $this->meeting;
             $limit                  = $this->meeting->cardboard_number ?? 1;
             $cardboardIdsSelected   = $request->cardboardIdsSelected;
 
