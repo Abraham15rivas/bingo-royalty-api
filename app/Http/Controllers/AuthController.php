@@ -122,6 +122,8 @@ class AuthController extends Controller
                 ]);
             }
 
+            $user->profile; 
+
             $msg = 'Usuario logeado con exito';
             $statusCode = 0;
         } else {
@@ -137,8 +139,6 @@ class AuthController extends Controller
             $token->save();
         }
 
-        $user->profile; 
-        $user->wallet; 
 
         return response()->json([
             'statusCode' => $statusCode,
