@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateMatricesTable extends Migration
+class CreatePricesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,12 @@ class CreateMatricesTable extends Migration
      */
     public function up()
     {
-        Schema::create('matrices', function (Blueprint $table) {
+        Schema::create('prices', function (Blueprint $table) {
             $table->id();
-            $table->json('cardboards');
-            $table->boolean('locked')->default(false);
-            $table->foreignId('matrix_group_id')
+            $table->string('name');
+            $table->text('description');
+            $table->decimal('amount');
+            $table->foreignId('price_type_id')
                 ->constrained()
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
@@ -33,6 +34,6 @@ class CreateMatricesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('matrices');
+        Schema::dropIfExists('prices');
     }
 }

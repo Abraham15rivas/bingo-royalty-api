@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateMatricesTable extends Migration
+class CreateMeetingUserTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,17 @@ class CreateMatricesTable extends Migration
      */
     public function up()
     {
-        Schema::create('matrices', function (Blueprint $table) {
+        Schema::create('meeting_user', function (Blueprint $table) {
             $table->id();
-            $table->json('cardboards');
-            $table->boolean('locked')->default(false);
-            $table->foreignId('matrix_group_id')
+            $table->foreignId('meeting_id')
+                ->constrained()
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
+            $table->foreignId('user_id')
                 ->constrained()
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
@@ -33,6 +34,6 @@ class CreateMatricesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('matrices');
+        Schema::dropIfExists('meeting_user');
     }
 }

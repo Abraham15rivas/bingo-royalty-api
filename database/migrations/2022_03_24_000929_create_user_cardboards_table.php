@@ -15,7 +15,7 @@ class CreateUserCardboardsTable extends Migration
     {
         Schema::create('user_cardboards', function (Blueprint $table) {
             $table->id();
-            $table->enum('status', ['inGame', 'expired', 'winner']);
+            $table->enum('status', ['available', 'inGame', 'expired', 'winner']);
             $table->string('serial');
             $table->json('cardboard');
             $table->foreignId('user_id')

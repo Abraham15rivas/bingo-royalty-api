@@ -1,7 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\{
+    AuthController,
+    PriceController
+};
 
 // Folder Admin
 use App\Http\Controllers\Admin\{
@@ -26,6 +29,11 @@ use App\Http\Controllers\User\{
     RequestController as RequestControllerUser
 };
 
+// Folder PlayAssistant
+use App\Http\Controllers\PlayAssistant\{
+    GameController
+};
+
 // Group route: v1.0 Bingo Royal
 Route::group([
     'prefix' => 'v1.0',
@@ -47,7 +55,10 @@ Route::group([
 
         // User
         Route::get('/user', [AuthController::class, 'user']);
-        
+
+        // List Price
+        Route::get('/prices', [PriceController::class, 'index']);
+
         // Group route: Admin
         Route::group([
             'prefix' => 'admin',
@@ -128,14 +139,23 @@ Route::group([
             // Requests
             Route::get('requests', [RequestControllerUser::class, 'index']);
             Route::post('request', [RequestControllerUser::class, 'store']);
-        });
 
+            // Game
+            Route::post('meeting', [GameController::class, 'connectMeeting']);
+            Route::get('meeting', [GameController::class, 'nextPlay']);
+            Route::get('game', [GameController::class, 'cardboardInPlay']);
+        });
+        
         // Group route: play-assistant
         Route::group([
             'prefix' => 'play-assistant',
             'middleware' => 'playAssistant',
         ], function () {
-            // code ...
+            Route::post('meeting', [GameController::class, 'createMeeting']);
+            Route::get('meeting', [GameController::class, 'index']);
+            Route::get('meeting/{id}', [GameController::class, 'show']);
+            Route::post('meeting/{id}/game', [GameController::class, 'throwNumber']);
+            Route::put('meeting/{id}/game', [GameController::class, 'initMeeting']);
         });
 
         // Group route: Supervisor

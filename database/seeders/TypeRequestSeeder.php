@@ -14,16 +14,15 @@ class TypeRequestSeeder extends Seeder
      */
     public function run()
     {
-        $roles = [
+        $typeRequest = [
             ['Top up balance', 'Recarga de saldo'],
-            ['Balance withdrawal', 'Retiro de saldo'],
-            ['VIP subscription', 'Suscripción VIP']
+            ['Balance withdrawal', 'Retiro de saldo']
         ];
 
-        foreach ($roles as $role) {
+        foreach ($typeRequest as $type) {
             TypeRequest::create([
-                'name'          => $role[0],
-                'description'   => $role[1]
+                'name'          => $type[0],
+                'description'   => $type[1]
             ]);
         }
     }

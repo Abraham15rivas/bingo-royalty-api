@@ -132,7 +132,6 @@ class AccountController extends Controller
             return response()->json($this->invalidRequest());
         }
 
-
         $this->validatorRules = [
             'name'        => 'string|required',
             'description' => 'string|nullable',
@@ -181,7 +180,7 @@ class AccountController extends Controller
 
         $account = Account::where('id',$id)->delete();
 
-        if($account > 0 ){
+        if($account > 0){
             return response()->json(['message'=>'Eliminado correctamente'], 200);
         }
     }

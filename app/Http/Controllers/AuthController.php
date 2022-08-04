@@ -53,7 +53,7 @@ class AuthController extends Controller
                     'password' => bcrypt($request->password),
                     'referral_code' => User::getUniqueReferralCode(),
                     'referred_by' => $this->getReferredBy($request->referral_code),
-                    'role_id'  => 3
+                    'role_id'  => 3 
                 ]);
                 
                 $user->save();
@@ -122,6 +122,8 @@ class AuthController extends Controller
                 ]);
             }
 
+            $user->profile; 
+
             $msg = 'Usuario logeado con exito';
             $statusCode = 0;
         } else {
@@ -137,10 +139,11 @@ class AuthController extends Controller
             $token->save();
         }
 
+
         return response()->json([
             'statusCode' => $statusCode,
             'message' => $msg,
-            'user' => $user ? ['change_the_first_password' => $user->change_the_first_password] : null,
+            'user' => $user ? $user : null,
             'accessToken' => $user ? $tokenResult->accessToken : null,
             'tokenType'   => $user ? 'Bearer' : null,
             'expiresAt'   => $user ? Carbon::parse($tokenResult->token->expires_at)->toDateTimeString() : null
@@ -151,6 +154,9 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $request->user()->token()->revoke();
+        $request->user()->status = 'desconectado';
+        $request->user()->save();
+
         return response()->json([
             'message' => 'Successfully logged out'
         ]);
@@ -160,8 +166,6 @@ class AuthController extends Controller
     {
         try {
             $user = $request->user();
-            $user->profile;
-            $user->wallet;
         } catch (\Throwable $th) {
             $statusCode = 1;
             $msg = 'Hubo un error';
@@ -170,7 +174,7 @@ class AuthController extends Controller
         return response()->json([
             'statusCode' => isset($statusCode) ? $statusCode : 0,
             'message' => isset($msg) ? $msg : 'Success',
-            'user' => $user ? $user : null
+            'imgProfile' => $user->profile->profile_image ? $user->profile->profile_image : null
         ]);
     }
 

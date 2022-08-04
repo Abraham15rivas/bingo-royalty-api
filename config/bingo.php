@@ -13,6 +13,8 @@ return [
 
     'rules' => [
         'rowNumber' => 5,
+        'minNumber' => 1,
+        'maxNumber' => 75,
         'letters'   => [
             'B' => [1, 15],
             'I' => [16, 30],
