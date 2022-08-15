@@ -438,4 +438,57 @@ class GameController extends Controller
 
         return response()->json($this->success($this->cardboard, 'cardboard'));
     }
+
+    public function singLine(Request $request) {
+        if (!$request->ajax()) {
+            return response()->json($this->invalidRequest());
+        }
+
+        $validatorRules['id'] = 'required|integer';
+
+        $validator = $this->validator($request->all(), $validatorRules, class_basename($this));
+
+        if ($validator->fails()) {
+            return $this->validationFail($validator->errors());
+        }
+
+        DB::beginTransaction();
+
+        try {
+
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json($this->serverError($e));
+        }
+
+        return response()->json($this->success([]));
+    }
+
+    public function singFullCardboard(Request $request) {
+        if (!$request->ajax()) {
+            return response()->json($this->invalidRequest());
+        }
+        
+        $validatorRules['id'] = 'required|integer';
+
+        $validator = $this->validator($request->all(), $validatorRules, class_basename($this));
+
+        if ($validator->fails()) {
+            return $this->validationFail($validator->errors());
+        }
+
+        DB::beginTransaction();
+
+        try {
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json($this->serverError($e));
+        }
+
+        return response()->json($this->success([]));
+    }
 }
